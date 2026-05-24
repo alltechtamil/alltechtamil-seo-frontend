@@ -40,6 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Initialize session on mount
   useEffect(() => {
     const initializeSession = async () => {
+      // If we already have a validated user session, do not re-fetch on route changes
+      if (isAuthenticated && user) return;
+
       // Only check session for admin panel or login routes
       if (!pathname?.startsWith('/admin') && !pathname?.startsWith('/login')) {
         return;
@@ -52,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         
         // Grab refreshed accessToken from the store since the Axios interceptor
         // automatically populates it if it had to execute a silent rotation.
-        // Lazy-loading the store state directly from module import ensures accuracy.
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const currentAccessToken = require("../store").store.getState().auth.accessToken;
 
@@ -75,7 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     initializeSession();
-  }, [dispatch, pathname]);
+    // Intentionally omitting pathname to prevent aggressive layout unmounting loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   const login = async (credentials: LoginCredentials) => {
     dispatch(setLoading(true));

@@ -6,6 +6,7 @@ export interface Tag {
   name: string;
   slug: string;
   createdAt: string;
+  blogsCount?: number;
 }
 
 /**

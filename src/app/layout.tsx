@@ -1,26 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather, JetBrains_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { ReduxProvider } from "../store/provider";
 import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const merriweather = Merriweather({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-serif",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
-
 import { envConfig } from "../config/env.config";
 
 export const metadata: Metadata = {
@@ -36,8 +18,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${merriweather.variable} ${jetBrainsMono.variable} h-full antialiased light`}
+      className="h-full antialiased light"
     >
+      <head>
+        {/* Preconnect for performance, then load fonts at runtime (not build-time) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Merriweather:wght@400;700&family=JetBrains+Mono:wght@100..800&display=swap"
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-on-background">
         <ReduxProvider>
           <AuthProvider>

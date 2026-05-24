@@ -25,7 +25,7 @@ export const getPublicCategories = cache(
  * Essential when resolving category details during generateMetadata and the page body render block.
  */
 export const getPublicCategory = cache(
-  async (slug: string): Promise<ApiResponse<Category>> => {
+  async (slug: string): Promise<ApiResponse<Category | null>> => {
     try {
       return await apiGetPublicCategory(slug);
     } catch (error) {

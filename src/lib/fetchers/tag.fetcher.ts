@@ -26,7 +26,7 @@ export const getPublicTags = cache(
  * Essential when resolving tag details during generateMetadata and the page body render block.
  */
 export const getPublicTag = cache(
-  async (slug: string): Promise<ApiResponse<Tag>> => {
+  async (slug: string): Promise<ApiResponse<Tag | null>> => {
     try {
       return await apiGetPublicTag(slug);
     } catch (error) {

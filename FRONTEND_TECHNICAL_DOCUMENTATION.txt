@@ -2507,7 +2507,7 @@ PHASE 15: ADMIN BLOG EDITOR
 [x] 15.10 Implement src/app/(admin)/admin/blogs/[id]/page.tsx (edit)
 [x] 15.11 Implement src/app/(admin)/admin/blogs/[id]/preview/page.tsx
 
-[ ] 15.11a Implement src/app/(admin)/admin/images/page.tsx
+[x] 15.11a Implement src/app/(admin)/admin/media/page.tsx
            - Image Library Page: lists, uploads, and deletes images
            - Includes copy-to-clipboard buttons for jsDelivr CDN URLs
 
@@ -2521,31 +2521,31 @@ PHASE 15: ADMIN BLOG EDITOR
 PHASE 16: ADMIN CATEGORY + TAG MANAGEMENT
 --------------------------------------------------
 
-[ ] 16.01 Create src/components/admin/CategoryManager.tsx
+[x] 16.01 Create src/components/admin/CategoryManager.tsx
           - List with sort_order, is_active toggle
           - Inline create/edit form
           - Delete with confirm
 
-[ ] 16.02 Implement src/app/(admin)/admin/categories/page.tsx
+[x] 16.02 Implement src/app/(admin)/admin/categories/page.tsx
 
-[ ] 16.03 Create src/components/admin/TagManager.tsx
+[x] 16.03 Create src/components/admin/TagManager.tsx
           - List with blog count
           - Inline create
           - Delete with confirm
 
-[ ] 16.04 Implement src/app/(admin)/admin/tags/page.tsx
+[x] 16.04 Implement src/app/(admin)/admin/tags/page.tsx
 
 --------------------------------------------------
 PHASE 17: ADMIN AD MANAGEMENT
 --------------------------------------------------
 
-[ ] 17.01 Create src/components/admin/AdManager.tsx
+[x] 17.01 Create src/components/admin/AdManager.tsx
           - Table: Name, Placement, Device, Status, Actions
           - Create/edit modal with ad_script textarea
           - Placement + device dropdowns
           - Enable/disable toggle
 
-[ ] 17.02 Implement src/app/(admin)/admin/ads/page.tsx
+[x] 17.02 Implement src/app/(admin)/admin/ads/page.tsx
 [ ] 17.03 Test ad create + verify it appears in public /ads endpoint
 [ ] 17.04 Test AdUnit component renders ad script on public page
 
@@ -2553,11 +2553,11 @@ PHASE 17: ADMIN AD MANAGEMENT
 PHASE 17b: ADMIN DIAGNOSTIC ERROR LOGS
 --------------------------------------------------
 
-[ ] 17b.01 Create src/lib/api/admin/error-logs.api.ts
+[x] 17b.01 Create src/lib/api/admin/error-logs.api.ts
            - getAdminErrorLogs(params)
            - clearAllErrorLogs()
            - bulkDeleteErrorLogs(ids)
-[ ] 17b.02 Implement src/app/(admin)/admin/error-logs/page.tsx
+[x] 17b.02 Implement src/app/(admin)/admin/error-logs/page.tsx
            - Paginated tabular display of error logs (correlation ID, errorCode, errorType, method, status, createdAt)
            - Drawer/Modal for viewing full JSON stackTrace and correlation metadata details
            - Selectable rows with bulk-delete support
@@ -2568,10 +2568,10 @@ PHASE 17b: ADMIN DIAGNOSTIC ERROR LOGS
 PHASE 18: ISR REVALIDATION WEBHOOK
 --------------------------------------------------
 
-[ ] 18.01 Implement src/app/api/revalidate/route.ts (Section 18)
-[ ] 18.02 Test webhook: POST with secret header + body
-[ ] 18.03 Verify revalidatePath clears ISR cache for correct routes
-[ ] 18.04 Coordinate with backend team to call webhook after publish
+[x] 18.01 Implement src/app/api/revalidate/route.ts (Section 18)
+[x] 18.02 Test webhook: POST with secret header + body
+[x] 18.03 Verify revalidatePath clears ISR cache for correct routes
+[x] 18.04 Coordinate with backend team to call webhook after publish
 
 --------------------------------------------------
 PHASE 19: SEO AUDIT AND FINAL CHECKS
