@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { envConfig } from '@/config/env.config';
 import { Blog } from '@/types/blog.types';
 import { getImageUrl } from './getImageUrl';
+import { ogDefault } from 'public/images';
 
 interface MetaProps {
     title: string;
@@ -15,27 +16,28 @@ interface MetaProps {
 export function buildMeta({
     title,
     description,
-    image = '/images/og-default.jpg',
+    image = ogDefault.src,
     url = envConfig.siteUrl,
     type = 'website',
     blog,
 }: MetaProps): Metadata {
     const siteName = envConfig.siteName;
-    
+
     // If it's a blog post, extract rich metadata
     if (blog) {
         const blogImageObj = getImageUrl(blog as any);
         const blogImage = typeof blogImageObj === 'string' ? blogImageObj : blogImageObj.src;
         const finalTitle = blog.seoTitle || blog.title;
         const finalDescription = blog.seoDescription || blog.excerpt || description;
-        
+        const tagsList = (blog.tags || (blog as any).Tags || []) as any[];
+
         return {
             title: finalTitle,
             description: finalDescription,
             alternates: {
                 canonical: blog.canonicalUrl || `${envConfig.siteUrl}/blog/${blog.slug}`,
             },
-            keywords: blog.focusKeyword ? [blog.focusKeyword, ...(blog.tags?.map(t => t.name) || [])] : (blog.tags?.map(t => t.name) || []),
+            keywords: blog.focusKeyword ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)] : tagsList.map((t: any) => t.name),
             openGraph: {
                 type: 'article',
                 siteName,
@@ -53,7 +55,7 @@ export function buildMeta({
                 publishedTime: blog.publishedAt || undefined,
                 modifiedTime: blog.updatedAt,
                 authors: blog.author ? [blog.author.name] : undefined,
-                tags: blog.tags?.map(t => t.name),
+                tags: tagsList.map((t: any) => t.name),
             },
             twitter: {
                 card: 'summary_large_image',

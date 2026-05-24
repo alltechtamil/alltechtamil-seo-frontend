@@ -19,6 +19,11 @@ Deployment      : Vercel / Cloudflare Pages
 API             : REST (backend Express.js server)
 Auth            : JWT access token (memory) + HTTP-only refresh cookie
 
+Routing Architecture & SEO Amendments (Finalized):
+- Public Article Detail Path: Migrated from root-level `/:slug` to dedicated `/blog/:slug` pattern to prevent namespace collisions with core resources.
+- Search Taxonomy Paths: Standardized tags to `/search/tag/:slug` and categories to `/search/category/:slug` across all components (e.g. PopularTags, CategoriesSection, Header, Footer) to ensure high-intent indexing.
+- Next.js Catch-All Redirection: Configured a dynamic 307 temporary redirect in `next.config.ts` mapping any root-level path (except login, search, blog, admin, static resources like /about or /contact, and internal files) to `/blog/:slug`. This resolves stale browser-cached 301 redirects and guarantees safe, consistent routing behavior.
+
 
 ==================================================
 SECTION 2: FRONTEND FOLDER STRUCTURE
@@ -2368,81 +2373,81 @@ PHASE 8: BLOG DETAIL PAGE
 [x] 8.11  Validate OpenGraph tags with og:debugger or similar tool
 [x] 8.12  Test ViewTracker fires analytics on mount/unmount
 [x] 8.13  Test TableOfContents scroll-spy on long articles
-[ ] 8.14  Verify responsive image rendering on mobile
+[x] 8.14  Verify responsive image rendering on mobile
 
 --------------------------------------------------
 PHASE 9: SEARCH PAGES
 --------------------------------------------------
 
-[ ] 9.01  Create src/components/search/SearchResults.tsx
-[ ] 9.02  Create src/components/search/SearchFilters.tsx
-[ ] 9.03  Implement src/app/(public)/search/page.tsx (SSR)
-[ ] 9.04  Implement src/app/(public)/search/category/[slug]/page.tsx (ISR)
-[ ] 9.05  Implement src/app/(public)/search/tag/[slug]/page.tsx (ISR)
-[ ] 9.06  Test search with query param ?q=...
-[ ] 9.07  Test empty results state
-[ ] 9.08  Test pagination on search results
-[ ] 9.09  Verify dynamic page titles in <head>
+[x] 9.01  Create src/components/search/SearchResults.tsx
+[x] 9.02  Create src/components/search/SearchFilters.tsx
+[x] 9.03  Implement src/app/(public)/search/page.tsx (SSR)
+[x] 9.04  Implement src/app/(public)/search/category/[slug]/page.tsx (ISR)
+[x] 9.05  Implement src/app/(public)/search/tag/[slug]/page.tsx (ISR)
+[x] 9.06  Test search with query param ?q=...
+[x] 9.07  Test empty results state
+[x] 9.08  Test pagination on search results
+[x] 9.09  Verify dynamic page titles in <head>
 
 --------------------------------------------------
 PHASE 10: CUSTOM 404 PAGE
 --------------------------------------------------
 
-[ ] 10.01 Implement src/app/not-found.tsx
+[x] 10.01 Implement src/app/not-found.tsx
           - SVG 404 illustration
           - SearchBar component
           - Trending blogs (cached fetch, revalidate: 300)
           - Home redirect button
-[ ] 10.02 Test by visiting /nonexistent-slug
+[x] 10.02 Test by visiting /nonexistent-slug
 
 --------------------------------------------------
 PHASE 11: SITEMAP AND ROBOTS
 --------------------------------------------------
 
-[ ] 11.01 Create public/robots.txt (Section 10)
-[ ] 11.02 Implement src/app/sitemap.ts
+[x] 11.01 Create public/robots.txt (Section 10)
+[x] 11.02 Implement src/app/sitemap.ts
           - Static routes
           - Dynamic blog slugs
           - Category slugs
           - Tag slugs
-[ ] 11.03 Test /sitemap.xml in browser → valid XML
-[ ] 11.04 Test /robots.txt renders correctly
+[x] 11.03 Test /sitemap.xml in browser → valid XML
+[x] 11.04 Test /robots.txt renders correctly
 
 --------------------------------------------------
 PHASE 12: ADMIN LAYOUT AND NAVIGATION
 --------------------------------------------------
 
-[ ] 12.01 Create src/components/layout/Sidebar.tsx
+[x] 12.01 Create src/components/layout/Sidebar.tsx
           - Logo
           - Navigation items: Dashboard, Blogs, Categories, Tags, Images, Analytics, Ads
           - Active route highlight
           - Collapse on mobile
 
-[ ] 12.02 Create src/components/layout/AdminTopbar.tsx
+[x] 12.02 Create src/components/layout/AdminTopbar.tsx
           - Page title
-          - User avatar dropdown: profile, logout
+          - User avatar dropdown: logout
 
-[ ] 12.03 Implement src/app/(admin)/layout.tsx
+[x] 12.03 Implement src/app/(admin)/layout.tsx
           - Auth guard (Section 19)
           - Sidebar + Topbar layout
           - Main content area
 
-[ ] 12.04 Create src/hooks/useAuth.ts
+[x] 12.04 Create src/hooks/useAuth.ts
           - Wrap AuthContext for easy access in components
 
 --------------------------------------------------
 PHASE 13: ADMIN DASHBOARD
 --------------------------------------------------
 
-[ ] 13.01 Create src/hooks/useAnalytics.ts
-[ ] 13.02 Create src/components/admin/AnalyticsDashboard.tsx
+[x] 13.01 Create src/hooks/useAnalytics.ts
+[x] 13.02 Create src/components/admin/AnalyticsDashboard.tsx
           - Stats cards
           - Top blogs table
           - Trending tags list
           - Recent searches list
-[ ] 13.03 Implement src/app/(admin)/admin/page.tsx
+[x] 13.03 Implement src/app/(admin)/admin/page.tsx
 
-[ ] 13.04 Implement src/app/(admin)/admin/analytics/page.tsx
+[x] 13.04 Implement src/app/(admin)/admin/analytics/page.tsx
           - Detailed analytics panel utilizing Redux state selectors
           - Stats tables, total view logs, trending search parameters, bounce analytics
 
@@ -2450,15 +2455,15 @@ PHASE 13: ADMIN DASHBOARD
 PHASE 14: ADMIN BLOG MANAGEMENT
 --------------------------------------------------
 
-[ ] 14.01 Create src/hooks/useBlogs.ts (admin)
-[ ] 14.02 Create src/components/admin/BlogTable.tsx
+[x] 14.01 Create src/hooks/useBlogs.ts (admin)
+[x] 14.02 Create src/components/admin/BlogTable.tsx
           - Columns: Title, Category, Tags, Status, Date, Actions
           - Row actions: Edit, Preview, Delete, Toggle Status
 
-[ ] 14.03 Create src/components/admin/ConfirmDialog.tsx
+[x] 14.03 Create src/components/admin/ConfirmDialog.tsx
           - Modal with confirm/cancel for delete actions
 
-[ ] 14.04 Implement src/app/(admin)/admin/blogs/page.tsx
+[x] 14.04 Implement src/app/(admin)/admin/blogs/page.tsx
           - Blog list with search, filter, pagination
           - Delete with confirmation dialog
 
@@ -2466,41 +2471,41 @@ PHASE 14: ADMIN BLOG MANAGEMENT
 PHASE 15: ADMIN BLOG EDITOR
 --------------------------------------------------
 
-[ ] 15.01 Create src/components/admin/RichTextEditor.tsx
+[x] 15.01 Create src/components/admin/RichTextEditor.tsx
           - TipTap setup with all extensions (Section 12)
           - Full toolbar
           - HTML input/output
 
-[ ] 15.02 Create src/components/admin/ImageUploader.tsx
+[x] 15.02 Create src/components/admin/ImageUploader.tsx
           - react-dropzone setup
           - Client-side validation
           - Upload + show single image preview with CDN URL
 
-[ ] 15.03 Create src/components/admin/ImagePicker.tsx
+[x] 15.03 Create src/components/admin/ImagePicker.tsx
           - Show already-uploaded images for a blog
 
-[ ] 15.04 Create src/components/admin/TagInput.tsx
+[x] 15.04 Create src/components/admin/TagInput.tsx
           - Combobox with existing tags
           - Create-on-enter
 
-[ ] 15.05 Create src/components/admin/SeoPanel.tsx
+[x] 15.05 Create src/components/admin/SeoPanel.tsx
           - All SEO fields with char counters
 
-[ ] 15.06 Create src/components/admin/PublishPanel.tsx
+[x] 15.06 Create src/components/admin/PublishPanel.tsx
           - Status toggle, date picker, featured toggle
           - Save + Publish buttons
 
-[ ] 15.07 Create src/hooks/useImageUpload.ts
+[x] 15.07 Create src/hooks/useImageUpload.ts
 
-[ ] 15.08 Create src/components/admin/BlogEditor.tsx
+[x] 15.08 Create src/components/admin/BlogEditor.tsx
           - Full layout: main (editor) + sidebar (panels)
           - react-hook-form with Zod schema
           - Dirty state tracking via blogEditorSlice (Redux)
           - Unsaved changes warning on navigate away
 
-[ ] 15.09 Implement src/app/(admin)/admin/blogs/new/page.tsx
-[ ] 15.10 Implement src/app/(admin)/admin/blogs/[id]/page.tsx (edit)
-[ ] 15.11 Implement src/app/(admin)/admin/blogs/[id]/preview/page.tsx
+[x] 15.09 Implement src/app/(admin)/admin/blogs/new/page.tsx
+[x] 15.10 Implement src/app/(admin)/admin/blogs/[id]/page.tsx (edit)
+[x] 15.11 Implement src/app/(admin)/admin/blogs/[id]/preview/page.tsx
 
 [ ] 15.11a Implement src/app/(admin)/admin/images/page.tsx
            - Image Library Page: lists, uploads, and deletes images

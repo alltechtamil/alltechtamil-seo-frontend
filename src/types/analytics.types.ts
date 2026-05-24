@@ -34,7 +34,10 @@ export interface AnalyticsOverview {
     publishedBlogs: number;
     totalViews: string | number;
   };
-  topBlogs: (BlogAnalytics & { blog: Pick<Blog, "id" | "title" | "slug" | "status"> })[];
+  topBlogs: (BlogAnalytics & { 
+    blog?: Pick<Blog, "id" | "title" | "slug" | "status">;
+    Blog?: Pick<Blog, "id" | "title" | "slug" | "status">;
+  })[];
   trendingTags: TrendingTag[];
   recentSearches: SearchLogItem[];
 }

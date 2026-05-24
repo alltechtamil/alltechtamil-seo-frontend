@@ -1,17 +1,24 @@
 /**
  * Standard API Response template matching the backend's ApiResponse utility structure.
  */
+export interface PaginationMetadata {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  totalCount?: number;
+  currentPage?: number;
+  perPage?: number;
+  hasPrevPage?: boolean;
+  hasNextPage?: boolean;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   status_code: number;
   message: string;
   data: T;
-  meta?: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta?: PaginationMetadata;
   errors?: unknown;
   correlation_id?: string;
   timestamp: string;
@@ -25,12 +32,7 @@ export interface ApiResponse<T> {
  * Standard Paginated Response wrapping list arrays.
  */
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta: PaginationMetadata;
 }
 
 /**

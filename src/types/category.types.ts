@@ -12,6 +12,7 @@ export interface Category {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+  blogsCount?: number;
 }
 
 /**

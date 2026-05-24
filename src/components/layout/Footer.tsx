@@ -2,8 +2,15 @@ import React from 'react';
 import Link from 'next/link';
 import { envConfig } from '@/config/env.config';
 import { Rss } from 'lucide-react';
+import { SEO_CONSTANTS } from '@/constants/seo.constants';
 
-export function Footer() {
+import type { Category } from '@/types/category.types';
+
+interface FooterProps {
+    categories?: Category[];
+}
+
+export function Footer({ categories = [] }: FooterProps) {
     return (
         <footer className="w-full pt-16 pb-8 bg-surface-container-lowest border-t border-outline-variant/30">
             <div className="max-w-7xl mx-auto px-gutter grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-16">
@@ -14,7 +21,7 @@ export function Footer() {
                         {envConfig.siteName}
                     </Link>
                     <p className="text-on-surface-variant text-base max-w-md leading-relaxed mb-8">
-                        Precision Content Engineering for the modern web. We empower developer teams and content creators to build, optimize, and scale technically perfect platforms.
+                        {SEO_CONSTANTS.defaultDescription}
                     </p>
                     
                     {/* Social Connect */}
@@ -39,9 +46,16 @@ export function Footer() {
                     <h4 className="font-bold text-sm text-on-surface uppercase tracking-widest mb-6">Platform</h4>
                     <ul className="flex flex-col gap-4">
                         <li><Link href={"/blog" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Articles</Link></li>
-                        <li><Link href={"/search/category/content-strategy" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Strategy</Link></li>
-                        <li><Link href={"/search/category/technical-seo" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Technical SEO</Link></li>
-                        <li><Link href={"/search/category/ai-automation" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Automation</Link></li>
+                        {categories.slice(0, 3).map((category) => (
+                            <li key={category.id}>
+                                <Link 
+                                    href={`/search/category/${category.slug}` as any} 
+                                    className="text-on-surface-variant hover:text-primary font-medium transition-colors"
+                                >
+                                    {category.name}
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 

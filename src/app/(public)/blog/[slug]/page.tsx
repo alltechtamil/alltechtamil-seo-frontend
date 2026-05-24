@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getPublicBlogBySlug, getRelatedBlogs, getPublicBlogs } from '@/lib/fetchers/blog.fetcher';
-import { buildMeta } from '@/lib/utils/buildMeta';
+import { buildSeoMetadata } from '@/lib/utils/seo.helper';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { AdUnit } from '@/components/ads/AdUnit';
 import { BlogMeta } from '@/components/blog/BlogMeta';
@@ -39,15 +39,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     try {
         const response = await getPublicBlogBySlug(slug);
         const blog = response.data;
-        if (!blog) return buildMeta({ title: 'Not Found', description: '' });
-        return buildMeta({
-            title: blog.title,
-            description: blog.excerpt || '',
+        if (!blog) return buildSeoMetadata({ title: 'Not Found', description: '', path: `/blog/${slug}` });
+        
+        const featuredImageObj = getImageUrl(blog as any);
+        const featuredImageUrl = typeof featuredImageObj === 'string' ? featuredImageObj : featuredImageObj.src;
+        
+        const tagsList = ((blog as any).Tags || blog.tags || []) as any[];
+        const keywords = blog.focusKeyword 
+            ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)] 
+            : tagsList.map((t: any) => t.name);
+
+        return buildSeoMetadata({
+            title: `${blog.seoTitle || blog.title} | AllTechTamil`,
+            description: blog.seoDescription || blog.excerpt || '',
+            image: featuredImageUrl,
             type: 'article',
-            blog: blog as any,
+            path: `/blog/${slug}`,
+            keywords: keywords.length > 0 ? keywords : undefined,
         });
     } catch {
-        return buildMeta({ title: 'Not Found', description: '' });
+        return buildSeoMetadata({ title: 'Not Found', description: '', path: `/blog/${slug}` });
     }
 }
 
@@ -87,6 +98,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     const featuredImageObj = getImageUrl(blog as any);
     const featuredImageUrl = typeof featuredImageObj === 'string' ? featuredImageObj : featuredImageObj.src;
     
+    const baseSiteUrl = envConfig.siteUrl.endsWith('/') ? envConfig.siteUrl : `${envConfig.siteUrl}/`;
+
     // Breadcrumb Data
     const breadcrumbItems: { label: string; href?: string }[] = [
         { label: 'Home', href: ROUTES.HOME },
@@ -99,33 +112,56 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     }
     breadcrumbItems.push({ label: blog.title });
 
-    // Structured Data for SEO
+    // 100x Better Structured Data for SEO: Premium BlogPosting Schema
+    const tagsList = (tags || []) as any[];
+    const keywordsArray = blog.focusKeyword 
+        ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)] 
+        : tagsList.map((t: any) => t.name);
+
     const articleStructuredData = blog.structuredData || {
         "@context": "https://schema.org",
-        "@type": "Article",
+        "@type": "BlogPosting",
         "headline": blog.seoTitle || blog.title,
+        "alternativeHeadline": blog.title,
         "description": blog.seoDescription || blog.excerpt,
         "image": featuredImageUrl,
         "datePublished": publishedAt,
-        "dateModified": blog.updatedAt,
+        "dateModified": blog.updatedAt || publishedAt,
+        "keywords": keywordsArray.join(', '),
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `${baseSiteUrl}blog/${blog.slug}`
+        },
         "author": {
             "@type": "Person",
-            "name": author?.name || "Editorial Team"
+            "name": author?.name || "Editorial Team",
+            "url": baseSiteUrl
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "All Tech Tamil",
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${baseSiteUrl}favicon-96x96.png`
+            }
         }
     };
 
     const breadcrumbStructuredData = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        "itemListElement": breadcrumbItems.map((item, index) => ({
-            "@type": "ListItem",
-            "position": index + 1,
-            "name": item.label,
-            "item": item.href ? `${envConfig.siteUrl}${item.href}` : undefined
-        }))
+        "itemListElement": breadcrumbItems.map((item, index) => {
+            const cleanHref = item.href 
+                ? (item.href.startsWith('/') ? item.href.slice(1) : item.href) 
+                : undefined;
+            return {
+                "@type": "ListItem",
+                "position": index + 1,
+                "name": item.label,
+                "item": item.href ? `${baseSiteUrl}${cleanHref}` : undefined
+            };
+        })
     };
-
-    console.log("BLOG", blog)
 
     return (
         <>

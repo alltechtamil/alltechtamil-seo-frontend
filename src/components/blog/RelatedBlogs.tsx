@@ -38,9 +38,9 @@ export function RelatedBlogs({ blogs }: RelatedBlogsProps) {
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                 </div>
-                                {blog.category && (
+                                {(blog.category || blog.Category) && (
                                     <span className="text-[10px] text-primary font-bold mb-2 block tracking-widest uppercase">
-                                        {blog.category.name}
+                                        {(blog.category || blog.Category)?.name}
                                     </span>
                                 )}
                                 <h3 className="font-medium text-lg text-on-background group-hover:text-primary transition-colors mb-2 line-clamp-2">

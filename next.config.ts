@@ -59,7 +59,7 @@ const nextConfig: NextConfig = {
       {
         // Catch any root-level slug that is not a known route and redirect to /blog/{slug}.
         // This handles browsers with the old cached 301 redirect (/blog/slug → /slug).
-        source: "/:slug((?!blog|search|login|admin|_next|api|images|favicon|about|contact|careers|privacy|terms|cookies).+)",
+        source: "/:slug((?!blog|search|login|admin|_next|api|images|favicon|about|contact|careers|privacy|terms|cookies|robots\\.txt|sitemap\\.xml).+)",
         destination: "/blog/:slug",
         permanent: false, // 307 — NOT cached by the browser, safe to change later
       },

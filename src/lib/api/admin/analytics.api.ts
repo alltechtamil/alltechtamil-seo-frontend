@@ -14,7 +14,7 @@ export const getAnalyticsOverview = async (): Promise<
 > => {
   try {
     const response = await adminClient.get<ApiResponse<AnalyticsOverview>>(
-      "/analytics/overview"
+      "/dashboard"
     );
     return response.data;
   } catch (error) {

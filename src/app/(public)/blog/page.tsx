@@ -5,13 +5,31 @@ import { ArrowRight, BookOpen } from 'lucide-react';
 
 import { BlogCard } from '@/components/blog/BlogCard';
 import { getPublicBlogs } from '@/lib/api/public/blogs.api';
+import { buildSeoMetadata } from '@/lib/utils/seo.helper';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { envConfig } from '@/config/env.config';
 import type { BlogListItem } from '@/types/blog.types';
 
 // --- Metadata ---
-export const metadata: Metadata = {
-    title: 'All Articles | AllTechTamil',
-    description: 'Browse all published articles on tech, programming, AI, and more from the AllTechTamil blog.',
-};
+export async function generateMetadata({ searchParams }: BlogListingPageProps): Promise<Metadata> {
+    const resolvedParams = await searchParams;
+    const currentPage = Math.max(1, parseInt(resolvedParams.page || '1', 10));
+    
+    const isFirstPage = currentPage === 1;
+    const title = isFirstPage 
+        ? 'All Articles | AllTechTamil' 
+        : `All Articles – Page ${currentPage} | AllTechTamil`;
+    const description = isFirstPage
+        ? 'Browse all published articles on tech, programming, AI, and more from the AllTechTamil blog.'
+        : `Browse all published articles on tech, programming, AI, and more (Page ${currentPage}) from the AllTechTamil blog.`;
+    const path = isFirstPage ? '/blog' : `/blog?page=${currentPage}`;
+
+    return buildSeoMetadata({
+        title,
+        description,
+        path,
+    });
+}
 
 // ISR: revalidate every hour
 export const revalidate = 3600;
@@ -147,6 +165,13 @@ export default async function BlogListingPage({ searchParams }: BlogListingPageP
                     </Link>
                 </div>
             )}
+            <JsonLd
+                type="combined"
+                breadcrumbs={[
+                    { position: 1, name: 'Home', item: envConfig.siteUrl || 'https://www.alltechtamil.in/' },
+                    { position: 2, name: 'Blog', item: `${(envConfig.siteUrl || 'https://www.alltechtamil.in/').replace(/\/$/, '')}/blog` }
+                ]}
+            />
         </div>
     );
 }

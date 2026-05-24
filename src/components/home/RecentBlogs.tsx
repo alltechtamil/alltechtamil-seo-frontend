@@ -14,13 +14,14 @@ export interface RecentBlogsProps {
 export function RecentBlogs({ posts, currentPage = 1, totalPages = 1 }: RecentBlogsProps) {
     return (
         <section aria-labelledby="latest-insights-title" className="lg:col-span-9">
-            <header className="mb-10 flex items-end justify-between border-b border-outline-variant/30 pb-4">
+            <header className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-outline-variant/30 pb-4">
                 <div className="flex flex-col gap-1">
                     <span className="text-primary text-xs font-extrabold uppercase tracking-widest">Feed</span>
                     <h2 id="latest-insights-title" className="font-headline-md text-3xl font-extrabold m-0 text-on-surface">Latest Insights</h2>
                 </div>
-                <Link className="text-primary text-sm font-bold flex items-center gap-1.5 group hover:text-primary-focus transition-colors bg-primary/10 px-4 py-2 rounded-lg" href={"/blog" as any} title="View all recent insights">
-                    View All <ArrowRight className="w-[16px] h-[16px] group-hover:translate-x-1 transition-transform" />
+                <Link className="text-primary text-sm font-bold flex items-center justify-center gap-1.5 group hover:text-primary-focus transition-colors bg-primary/10 px-4 py-2.5 rounded-lg w-full sm:w-auto" href={"/blog" as any} title="View all recent insights">
+                    <span>View All</span>
+                    <ArrowRight className="w-[16px] h-[16px] group-hover:translate-x-1 transition-transform" />
                 </Link>
             </header>
 

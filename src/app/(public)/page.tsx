@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import type { BlogListItem } from '@/types/blog.types';
 import type { CategorySummary } from '@/components/home/CategoriesSection';
@@ -12,9 +11,18 @@ import { RecentBlogs } from '@/components/home/RecentBlogs';
 import { getPublicBlogs } from '@/lib/api/public/blogs.api';
 import { getPublicCategories } from '@/lib/api/public/categories.api';
 import { getPublicTags } from '@/lib/api/public/tags.api';
+import { buildSeoMetadata } from '@/lib/utils/seo.helper';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { envConfig } from '@/config/env.config';
 
 // Revalidate this page in the background every 3600 seconds (1 hour)
 export const revalidate = 3600;
+
+export const metadata = buildSeoMetadata({
+    title: 'All Tech Tamil – Tamil Tech News, ChatGPT & AI Image Prompts',
+    description: 'Stay ahead with All Tech Tamil: daily Tamil‑language tech news, expert ChatGPT text/image prompts, AI & ML tutorials, and gadget reviews.',
+    path: '/',
+});
 
 export default async function Home() {
     let allPosts: BlogListItem[] = [];
@@ -83,6 +91,22 @@ export default async function Home() {
                     </aside>
                 </div>
             </div>
+            <JsonLd
+                type="combined"
+                breadcrumbs={[
+                    { position: 1, name: 'Home', item: envConfig.siteUrl || 'https://www.alltechtamil.in/' }
+                ]}
+                faqs={[
+                    {
+                        question: 'How do I use ChatGPT prompts in Tamil?',
+                        answer: 'Browse our curated Tamil ChatGPT prompt library—copy & paste directly.'
+                    },
+                    {
+                        question: 'Where can I find AI image prompts in Tamil?',
+                        answer: 'Explore step‑by‑step AI image‑generation tutorials with Tamil prompts.'
+                    }
+                ]}
+            />
         </>
     );
 }

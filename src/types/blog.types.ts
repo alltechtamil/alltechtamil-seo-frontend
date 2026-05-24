@@ -68,7 +68,9 @@ export interface BlogListItem {
   // Populated Relations
   author?: Pick<User, "id" | "name" | "email" | "avatarUrl" | "role">;
   category?: Pick<Category, "id" | "name" | "slug"> | null;
+  Category?: Pick<Category, "id" | "name" | "slug"> | null;
   tags?: Pick<Tag, "id" | "name" | "slug">[];
+  Tags?: Pick<Tag, "id" | "name" | "slug">[];
   
   createdAt: string;
   updatedAt: string;
