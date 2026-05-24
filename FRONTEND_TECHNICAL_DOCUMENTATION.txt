@@ -52,8 +52,10 @@ frontend/
 │   │   │   │   └── tag/
 │   │   │   │       └── [slug]/
 │   │   │   │           └── page.tsx # /search/tag/google-ai
-│   │   │   └── [slug]/
-│   │   │       └── page.tsx         # /blog-slug (blog detail)
+│   │   │   ├── blog/
+│   │   │   │   ├── page.tsx         # /blog (listing)
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx     # /blog/slug (blog detail)
 │   │   │
 │   │   ├── (admin)/                 # Route group: admin panel
 │   │   │   ├── layout.tsx           # Admin layout (sidebar, topbar)
@@ -290,7 +292,7 @@ headers:
     Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 redirects:
-  /blog/:slug → /:slug (if short URLs preferred)
+  /:slug((?!blog|search|login|admin|_next|api|images|favicon|about|contact|careers|privacy|terms|cookies).+) → /blog/:slug (Handles cached 301s from legacy /:slug routes)
 
 experimental:
   typedRoutes: true
@@ -1026,7 +1028,7 @@ Fetches     : Featured blog, recent blogs (10), categories, popular tags
 Why ISR     : Content changes infrequently, needs SEO, benefit from caching
 
 --------------------------------------------------
-Blog Detail (/:slug)
+Blog Detail (/blog/:slug)
 --------------------------------------------------
 Strategy    : ISR
 Revalidate  : 120 seconds
@@ -1150,17 +1152,17 @@ Returns:
     - / (home)
     - /search
   Dynamic routes:
-    - Fetch all published blog slugs → /:slug
+    - Fetch all published blog slugs → /blog/:slug
     - Fetch all categories → /search/category/:slug
     - Fetch all tags → /search/tag/:slug
   Priority:
     - / : 1.0
-    - /:slug (blog) : 0.8
+    - /blog/:slug : 0.8
     - /search/category/* : 0.6
     - /search/tag/* : 0.5
   changeFrequency:
     - / : daily
-    - /:slug : weekly
+    - /blog/:slug : weekly
 
 
 --------------------------------------------------
@@ -1212,7 +1214,7 @@ Component structure:
 
 
 --------------------------------------------------
-Blog Detail Page (src/app/(public)/[slug]/page.tsx)
+Blog Detail Page (src/app/(public)/blog/[slug]/page.tsx)
 --------------------------------------------------
 
 Type        : async Server Component
@@ -1991,7 +1993,7 @@ In Admin mutations (e.g. Save, Delete):
 Not Found Handling
 --------------------------------------------------
 
-Blog detail (/:slug):
+Blog detail (/blog/:slug):
   If API returns 404 → Next.js notFound() → not-found.tsx
 
 Admin blog editor (/admin/blogs/[id]):
@@ -2278,49 +2280,49 @@ PHASE 4: AUTH SYSTEM
           - On success: dispatch setAuth + redirect to /admin
           - On error: show toast
 
-[ ] 4.12  Test login flow end to end with running backend
-[ ] 4.13  Test middleware redirect on accessing /admin without cookie
-[ ] 4.14  Test token refresh: wait for access token expiry, verify retry works
+[x] 4.12  Test login flow end to end with running backend
+[x] 4.13  Test middleware redirect on accessing /admin without cookie
+[x] 4.14  Test token refresh: wait for access token expiry, verify retry works
 
 --------------------------------------------------
 PHASE 5: BASE UI COMPONENTS
 --------------------------------------------------
 
-[ ] 5.01  Create src/components/ui/Button.tsx
+[x] 5.01  Create src/components/ui/Button.tsx
           - Variants: primary, secondary, ghost, danger
           - Sizes: sm, md, lg
           - Loading state with Spinner
 
-[ ] 5.02  Create src/components/ui/Input.tsx
+[x] 5.02  Create src/components/ui/Input.tsx
           - Label, error message, helper text
           - Forward ref for RHF compatibility
 
-[ ] 5.03  Create src/components/ui/Textarea.tsx
-[ ] 5.04  Create src/components/ui/Select.tsx
-[ ] 5.05  Create src/components/ui/Badge.tsx (category/tag chips)
-[ ] 5.06  Create src/components/ui/Card.tsx
-[ ] 5.07  Create src/components/ui/Modal.tsx (portal-based)
-[ ] 5.08  Create src/components/ui/Spinner.tsx
-[ ] 5.09  Create src/components/ui/Toast.tsx (using react-hot-toast)
-[ ] 5.10  Create src/components/ui/Breadcrumb.tsx
-[ ] 5.11  Create src/components/ui/Pagination.tsx (Section 12 spec)
-[ ] 5.12  Create src/components/ui/EmptyState.tsx
-[ ] 5.13  Create src/components/ui/Avatar.tsx
+[x] 5.03  Create src/components/ui/Textarea.tsx
+[x] 5.04  Create src/components/ui/Select.tsx
+[x] 5.05  Create src/components/ui/Badge.tsx (category/tag chips)
+[x] 5.06  Create src/components/ui/Card.tsx
+[x] 5.07  Create src/components/ui/Modal.tsx (portal-based)
+[x] 5.08  Create src/components/ui/Spinner.tsx
+[x] 5.09  Create src/components/ui/Toast.tsx (using react-hot-toast)
+[x] 5.10  Create src/components/ui/Breadcrumb.tsx
+[x] 5.11  Create src/components/ui/Pagination.tsx (Section 12 spec)
+[x] 5.12  Create src/components/ui/EmptyState.tsx
+[x] 5.13  Create src/components/ui/Avatar.tsx
 
 --------------------------------------------------
 PHASE 6: PUBLIC LAYOUT AND HEADER/FOOTER
 --------------------------------------------------
 
-[ ] 6.01  Create src/components/layout/Header.tsx
+[x] 6.01  Create src/components/layout/Header.tsx
           - Logo/site name
           - Navigation: Home, Categories dropdown, Search icon
           - Mobile hamburger menu
 
-[ ] 6.02  Create src/components/layout/MobileMenu.tsx
-[ ] 6.03  Create src/components/layout/Footer.tsx
+[x] 6.02  Create src/components/layout/MobileMenu.tsx
+[x] 6.03  Create src/components/layout/Footer.tsx
           - Site name, links, copyright
 
-[ ] 6.04  Create src/app/(public)/layout.tsx
+[x] 6.04  Create src/app/(public)/layout.tsx
           - Wrap with Header + Footer
           - Max-width container
 
@@ -2328,44 +2330,44 @@ PHASE 6: PUBLIC LAYOUT AND HEADER/FOOTER
 PHASE 7: HOME PAGE
 --------------------------------------------------
 
-[ ] 7.01  Create src/components/search/SearchBar.tsx
-[ ] 7.02  Create src/components/blog/BlogCard.tsx (Section 12 spec)
-[ ] 7.03  Create src/components/blog/BlogCardFeatured.tsx
-[ ] 7.04  Create src/components/home/HeroSection.tsx (featured blog)
-[ ] 7.05  Create src/components/home/RecentBlogs.tsx (blog grid)
-[ ] 7.06  Create src/components/home/CategoriesSection.tsx
-[ ] 7.07  Create src/components/home/PopularTags.tsx
-[ ] 7.08  Create src/components/ads/AdUnit.tsx (Section 12 spec)
-[ ] 7.09  Implement src/app/page.tsx (ISR, parallel data fetch)
-[ ] 7.10  Create src/lib/utils/getImageUrl.ts
+[x] 7.01  Create src/components/search/SearchBar.tsx
+[x] 7.02  Create src/components/blog/BlogCard.tsx (Section 12 spec)
+[x] 7.03  Create src/components/blog/BlogCardFeatured.tsx
+[x] 7.04  Create src/components/home/HeroSection.tsx (featured blog)
+[x] 7.05  Create src/components/home/RecentBlogs.tsx (blog grid)
+[x] 7.06  Create src/components/home/CategoriesSection.tsx
+[x] 7.07  Create src/components/home/PopularTags.tsx
+[x] 7.08  Create src/components/ads/AdUnit.tsx (Section 12 spec)
+[x] 7.09  Implement src/app/page.tsx (ISR, parallel data fetch)
+[x] 7.10  Create src/lib/utils/getImageUrl.ts
           - Extracts CDN URL from blog.images[0] with og_image_url and placeholder fallbacks
-[ ] 7.11  Create src/lib/utils/formatDate.ts (using date-fns)
-[ ] 7.12  Create src/lib/utils/formatReadTime.ts
-[ ] 7.13  Create src/lib/utils/truncateText.ts
-[ ] 7.14  Test home page renders with real API data
-[ ] 7.15  Verify ISR revalidate behavior (check Next.js cache headers)
+[x] 7.11  Create src/lib/utils/formatDate.ts (using date-fns)
+[x] 7.12  Create src/lib/utils/formatReadTime.ts
+[x] 7.13  Create src/lib/utils/truncateText.ts
+[x] 7.14  Test home page renders with real API data
+[x] 7.15  Verify ISR revalidate behavior (check Next.js cache headers)
 
 --------------------------------------------------
 PHASE 8: BLOG DETAIL PAGE
 --------------------------------------------------
 
-[ ] 8.01  Create src/components/blog/BlogMeta.tsx
-[ ] 8.02  Create src/components/blog/BlogContent.tsx
-[ ] 8.03  Create src/components/blog/TableOfContents.tsx
-[ ] 8.04  Create src/components/blog/RelatedBlogs.tsx
-[ ] 8.05  Create src/components/blog/ReadingProgress.tsx
-[ ] 8.06  Create ViewTracker client component (Section 11)
-[ ] 8.07  Create src/components/seo/JsonLd.tsx
-[ ] 8.08  Create src/lib/utils/buildMeta.ts (generateMetadata helper)
-[ ] 8.09  Implement src/app/(public)/[slug]/page.tsx
+[x] 8.01  Create src/components/blog/BlogMeta.tsx
+[x] 8.02  Create src/components/blog/BlogContent.tsx
+[x] 8.03  Create src/components/blog/TableOfContents.tsx
+[x] 8.04  Create src/components/blog/RelatedBlogs.tsx
+[x] 8.05  Create src/components/blog/ReadingProgress.tsx
+[x] 8.06  Create ViewTracker client component (Section 11)
+[x] 8.07  Create src/components/seo/JsonLd.tsx
+[x] 8.08  Create src/lib/utils/buildMeta.ts (generateMetadata helper)
+[x] 8.09  Implement src/app/(public)/blog/[slug]/page.tsx
           - generateStaticParams
           - generateMetadata (Section 10)
           - Full page layout (Section 11)
           - JsonLd (Article + Breadcrumb)
-[ ] 8.10  Test blog detail page SEO: check <head> with browser devtools
-[ ] 8.11  Validate OpenGraph tags with og:debugger or similar tool
-[ ] 8.12  Test ViewTracker fires analytics on mount/unmount
-[ ] 8.13  Test TableOfContents scroll-spy on long articles
+[x] 8.10  Test blog detail page SEO: check <head> with browser devtools
+[x] 8.11  Validate OpenGraph tags with og:debugger or similar tool
+[x] 8.12  Test ViewTracker fires analytics on mount/unmount
+[x] 8.13  Test TableOfContents scroll-spy on long articles
 [ ] 8.14  Verify responsive image rendering on mobile
 
 --------------------------------------------------

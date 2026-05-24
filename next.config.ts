@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
         hostname: "avatars.githubusercontent.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -47,9 +57,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/blog/:slug",
-        destination: "/:slug",
-        permanent: true,
+        // Catch any root-level slug that is not a known route and redirect to /blog/{slug}.
+        // This handles browsers with the old cached 301 redirect (/blog/slug → /slug).
+        source: "/:slug((?!blog|search|login|admin|_next|api|images|favicon|about|contact|careers|privacy|terms|cookies).+)",
+        destination: "/blog/:slug",
+        permanent: false, // 307 — NOT cached by the browser, safe to change later
       },
     ];
   },

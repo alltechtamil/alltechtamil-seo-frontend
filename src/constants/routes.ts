@@ -5,8 +5,9 @@
 export const ROUTES = {
   // Public facing routes
   HOME: "/",
+  BLOG: "/blog",
   SEARCH: "/search",
-  BLOG_DETAIL: (slug: string) => `/${slug}`,
+  BLOG_DETAIL: (slug: string) => `/blog/${slug}`,
   CATEGORY: (slug: string) => `/search/category/${slug}`,
   TAG: (slug: string) => `/search/tag/${slug}`,
 
@@ -15,7 +16,7 @@ export const ROUTES = {
 
   // Protected Admin routes
   ADMIN: "/admin",
-  ADMIN_DASHBOARD: "/admin",
+  ADMIN_DASHBOARD: "/admin/dashboard",
   ADMIN_BLOGS: "/admin/blogs",
   ADMIN_BLOG_CREATE: "/admin/blogs/new",
   ADMIN_BLOG_EDIT: (id: number | string) => `/admin/blogs/${id}`,

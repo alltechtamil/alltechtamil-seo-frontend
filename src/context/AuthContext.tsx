@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   setAuth,
@@ -34,9 +35,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     (state) => state.auth
   );
 
+  const pathname = usePathname();
+
   // Initialize session on mount
   useEffect(() => {
     const initializeSession = async () => {
+      // Only check session for admin panel or login routes
+      if (!pathname?.startsWith('/admin') && !pathname?.startsWith('/login')) {
+        return;
+      }
+
       dispatch(setLoading(true));
       try {
         const response = await apiGetMe();
@@ -67,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     initializeSession();
-  }, [dispatch]);
+  }, [dispatch, pathname]);
 
   const login = async (credentials: LoginCredentials) => {
     dispatch(setLoading(true));
