@@ -1,0 +1,2605 @@
+==================================================
+FRONTEND TECHNICAL DOCUMENTATION
+SEO Optimized Blog Platform
+==================================================
+Version     : 1.0.0
+Stack       : Next.js 15 (App Router) + TypeScript + Tailwind CSS v4
+Prepared for: Frontend Engineering Team
+==================================================
+
+
+==================================================
+SECTION 1: PROJECT OVERVIEW
+==================================================
+
+Platform Type   : SEO-optimized blog platform + admin panel
+Frontend Role   : Server-side rendered public blog, client-side admin SPA
+Rendering Model : SSR + SSG + ISR for public pages, CSR for admin panel
+Deployment      : Vercel / Cloudflare Pages
+API             : REST (backend Express.js server)
+Auth            : JWT access token (memory) + HTTP-only refresh cookie
+
+
+==================================================
+SECTION 2: FRONTEND FOLDER STRUCTURE
+==================================================
+
+frontend/
+├── public/
+│   ├── favicon.ico
+│   ├── robots.txt
+│   └── sitemap.xml                  # Auto-generated or static fallback
+│
+├── src/
+│   ├── config/                      # Centralized environment variables config
+│   │   └── env.config.ts
+│   │
+│   ├── app/                         # Next.js App Router
+│   │   ├── layout.tsx               # Root layout (fonts, global providers)
+│   │   ├── page.tsx                 # Home page
+│   │   ├── not-found.tsx            # Custom 404 page
+│   │   ├── error.tsx                # Global error boundary
+│   │   ├── loading.tsx              # Global loading UI
+│   │   │
+│   │   ├── (public)/                # Route group: public blog
+│   │   │   ├── layout.tsx           # Public layout (header, footer)
+│   │   │   ├── search/
+│   │   │   │   └── page.tsx         # /search?q=keyword
+│   │   │   ├── search/
+│   │   │   │   ├── category/
+│   │   │   │   │   └── [slug]/
+│   │   │   │   │       └── page.tsx # /search/category/apps
+│   │   │   │   └── tag/
+│   │   │   │       └── [slug]/
+│   │   │   │           └── page.tsx # /search/tag/google-ai
+│   │   │   └── [slug]/
+│   │   │       └── page.tsx         # /blog-slug (blog detail)
+│   │   │
+│   │   ├── (admin)/                 # Route group: admin panel
+│   │   │   ├── layout.tsx           # Admin layout (sidebar, topbar)
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx         # /login
+│   │   │   └── admin/
+│   │   │       ├── page.tsx         # /admin (dashboard)
+│   │   │       ├── blogs/
+│   │   │       │   ├── page.tsx     # /admin/blogs (list)
+│   │   │       │   ├── new/
+│   │   │       │   │   └── page.tsx # /admin/blogs/new
+│   │   │       │   └── [id]/
+│   │   │       │       ├── page.tsx        # /admin/blogs/[id]/edit
+│   │   │       │       └── preview/
+│   │   │       │           └── page.tsx    # /admin/blogs/[id]/preview
+│   │   │       ├── categories/
+│   │   │       │   └── page.tsx
+│   │   │       ├── tags/
+│   │   │       │   └── page.tsx
+│   │   │       ├── images/
+│   │   │       │   └── page.tsx
+│   │   │       ├── analytics/
+│   │   │       │   └── page.tsx
+│   │   │       ├── ads/
+│   │   │       │   └── page.tsx
+│   │   │       └── error-logs/
+│   │   │           └── page.tsx
+│   │   │
+│   │   ├── api/                     # Next.js Route Handlers
+│   │   │   └── revalidate/
+│   │   │       └── route.ts         # ISR revalidation webhook endpoint
+│   │   │
+│   │   └── sitemap.ts               # Dynamic sitemap generator
+│   │
+│   ├── components/
+│   │   ├── ui/                      # Reusable base components
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Textarea.tsx
+│   │   │   ├── Select.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Pagination.tsx
+│   │   │   ├── Spinner.tsx
+│   │   │   ├── Toast.tsx
+│   │   │   ├── Tooltip.tsx
+│   │   │   ├── Breadcrumb.tsx
+│   │   │   ├── Avatar.tsx
+│   │   │   └── EmptyState.tsx
+│   │   │
+│   │   ├── layout/                  # Layout components
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Sidebar.tsx          # Admin sidebar
+│   │   │   ├── AdminTopbar.tsx
+│   │   │   └── MobileMenu.tsx
+│   │   │
+│   │   ├── blog/                    # Blog-specific components
+│   │   │   ├── BlogCard.tsx
+│   │   │   ├── BlogCardFeatured.tsx
+│   │   │   ├── BlogList.tsx
+│   │   │   ├── BlogDetail.tsx
+│   │   │   ├── BlogContent.tsx      # Renders sanitized HTML
+│   │   │   ├── BlogMeta.tsx         # Author, date, read time
+│   │   │   ├── RelatedBlogs.tsx
+│   │   │   ├── TableOfContents.tsx
+│   │   │   └── ReadingProgress.tsx
+│   │   │
+│   │   ├── search/
+│   │   │   ├── SearchBar.tsx
+│   │   │   ├── SearchResults.tsx
+│   │   │   └── SearchFilters.tsx
+│   │   │
+│   │   ├── home/
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── RecentBlogs.tsx
+│   │   │   ├── CategoriesSection.tsx
+│   │   │   └── PopularTags.tsx
+│   │   │
+│   │   ├── ads/
+│   │   │   └── AdUnit.tsx           # Dynamic ad renderer
+│   │   │
+│   │   ├── seo/
+│   │   │   └── JsonLd.tsx           # Structured data injector
+│   │   │
+│   │   └── admin/
+│   │       ├── BlogEditor.tsx       # Main blog create/edit form
+│   │       ├── RichTextEditor.tsx   # HTML content editor
+│   │       ├── ImageUploader.tsx    # Drag-and-drop image upload
+│   │       ├── ImagePicker.tsx      # Pick from uploaded images
+│   │       ├── TagInput.tsx
+│   │       ├── SeoPanel.tsx         # SEO fields section
+│   │       ├── PublishPanel.tsx     # Status, date, featured toggle
+│   │       ├── CategoryManager.tsx
+│   │       ├── TagManager.tsx
+│   │       ├── AdManager.tsx
+│   │       ├── AnalyticsDashboard.tsx
+│   │       ├── BlogTable.tsx
+│   │       └── ConfirmDialog.tsx
+│   │
+│   ├── hooks/
+│   │   ├── useAuth.ts               # Auth state, login, logout
+│   │   ├── useBlogs.ts              # Blog list with filters
+│   │   ├── useBlog.ts               # Single blog fetch
+│   │   ├── useCategories.ts
+│   │   ├── useTags.ts
+│   │   ├── useAnalytics.ts
+│   │   ├── useAds.ts
+│   │   ├── useImageUpload.ts
+│   │   ├── useDebounce.ts
+│   │   ├── usePagination.ts
+│   │   ├── useReadingProgress.ts
+│   │   └── useLocalStorage.ts
+│   │
+│   ├── lib/
+│   │   ├── api/
+│   │   │   ├── adminClient.ts       # Admin Axios instance (auth interceptors)
+│   │   │   ├── publicClient.ts      # Public Axios instance (no auth needed)
+│   │   │   ├── admin/               # Admin endpoints (/v1/admin/*)
+│   │   │   │   ├── auth.api.ts
+│   │   │   │   ├── blogs.api.ts
+│   │   │   │   ├── categories.api.ts
+│   │   │   │   ├── tags.api.ts
+│   │   │   │   ├── images.api.ts
+│   │   │   │   ├── analytics.api.ts
+│   │   │   │   ├── ads.api.ts
+│   │   │   │   └── error-logs.api.ts
+│   │   │   └── public/              # Public endpoints (/v1/public/*)
+│   │   │       ├── blogs.api.ts
+│   │   │       ├── categories.api.ts
+│   │   │       ├── tags.api.ts
+│   │   │       ├── analytics.api.ts
+│   │   │       └── ads.api.ts
+│   │   │
+│   │   ├── fetchers/                # Server-side fetch functions (SSR/SSG)
+│   │   │   ├── blog.fetcher.ts
+│   │   │   ├── category.fetcher.ts
+│   │   │   └── tag.fetcher.ts
+│   │   │
+│   │   └── utils/
+│   │       ├── formatDate.ts
+│   │       ├── formatReadTime.ts
+│   │       ├── truncateText.ts
+│   │       ├── getImageUrl.ts       # Safe image CDN URL extractor with fallback
+│   │       ├── buildMeta.ts         # generateMetadata helper
+│   │       └── cn.ts                # Tailwind classname merger (clsx + twMerge)
+│   │
+│   ├── context/
+│   │   ├── AuthContext.tsx
+│   │   └── ToastContext.tsx
+│   │
+│   ├── store/                       # Redux Toolkit store (admin state)
+│   │   ├── index.ts                 # configureStore + root reducer
+│   │   ├── hooks.ts                 # Typed useAppDispatch & useAppSelector
+│   │   ├── provider.tsx             # Redux Provider wrapper component
+│   │   └── slices/
+│   │       ├── authSlice.ts         # Auth state (token, user, loading)
+│   │       ├── blogEditorSlice.ts   # Editor dirty state, currentBlogId
+│   │       ├── uiSlice.ts           # Sidebar, global UI toggles
+│   │       └── errorLogsSlice.ts    # System diagnostics management slice
+│   │
+│   ├── types/
+│   │   ├── blog.types.ts
+│   │   ├── user.types.ts
+│   │   ├── category.types.ts
+│   │   ├── tag.types.ts
+│   │   ├── image.types.ts
+│   │   ├── analytics.types.ts
+│   │   ├── ad.types.ts
+│   │   ├── error-log.types.ts
+│   │   └── api.types.ts
+│   │
+│   ├── styles/
+│   │   ├── globals.css              # Tailwind directives + CSS variables
+│   │   └── typography.css           # Blog content HTML typography styles
+│   │
+│   ├── constants/
+│   │   ├── routes.ts                # App route constants
+│   │   └── adPlacements.ts          # Ad placement key constants
+│   │
+│   └── middleware.ts                # Next.js middleware (auth guard)
+│
+├── .env.local
+├── .env.example
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
+
+
+==================================================
+SECTION 3: ENVIRONMENT VARIABLES
+==================================================
+
+# API
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1
+
+# Site
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+NEXT_PUBLIC_SITE_NAME=YourBlogName
+
+# jsDelivr CDN Base (for image validation)
+NEXT_PUBLIC_CDN_BASE=https://cdn.jsdelivr.net/gh/owner/repo@main
+
+# ISR Revalidation
+REVALIDATE_SECRET=your_revalidate_secret_token
+
+# Analytics (optional, future)
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+
+
+==================================================
+SECTION 4: NEXT.JS CONFIGURATION
+==================================================
+
+-- next.config.ts --
+
+Configuration:
+
+images:
+  remotePatterns:
+    - hostname: cdn.jsdelivr.net   (jsDelivr CDN for blog images)
+    - hostname: avatars.githubusercontent.com (author avatars if used)
+  formats: ['image/avif', 'image/webp']
+  deviceSizes: [640, 750, 828, 1080, 1200, 1920]
+  imageSizes: [16, 32, 48, 64, 96, 128, 256]
+
+headers:
+  Apply to all routes:
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: DENY
+    Referrer-Policy: strict-origin-when-cross-origin
+    Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+redirects:
+  /blog/:slug → /:slug (if short URLs preferred)
+
+experimental:
+  typedRoutes: true
+
+reactStrictMode: true
+
+-- tsconfig.json --
+
+compilerOptions:
+  target          : ES2020
+  lib             : ['dom', 'dom.iterable', 'esnext']
+  allowJs         : true
+  strict          : true
+  moduleResolution: bundler
+  jsx             : preserve
+  incremental     : true
+  baseUrl         : .
+  paths:
+    @/*           : ['./src/*']
+    @ui/*         : ['./src/components/ui/*']
+    @lib/*        : ['./src/lib/*']
+    @types/*      : ['./src/types/*']
+    @hooks/*      : ['./src/hooks/*']
+    @store/*      : ['./src/store/*']
+
+
+==================================================
+SECTION 5: DEPENDENCY LIST
+==================================================
+
+Production:
+  next                             # v15+
+  react                            # v19+
+  react-dom
+  typescript
+  tailwindcss                      # v4
+  @tailwindcss/typography          # prose styles for blog content
+  axios                            # HTTP client
+
+  @reduxjs/toolkit                  # Client state management (admin)
+  react-redux                        # React bindings for Redux
+  react-hook-form                  # Admin forms
+  zod                              # Form validation schemas
+  @hookform/resolvers              # Zod + RHF integration
+  clsx                             # Conditional classnames
+  tailwind-merge                   # Merge Tailwind classes safely
+  date-fns                         # Date formatting
+  react-hot-toast                  # Toast notifications
+  @tiptap/react                    # Rich text editor (HTML output)
+  @tiptap/starter-kit
+  @tiptap/extension-image
+  @tiptap/extension-link
+  @tiptap/extension-placeholder
+  @tiptap/extension-code-block-lowlight
+  lowlight                         # Code highlighting in editor
+  react-dropzone                   # Image drag-and-drop upload
+  lucide-react                     # Icon library
+  next-themes                      # Dark mode support (optional)
+
+Development:
+  eslint
+  eslint-config-next
+  @typescript-eslint/eslint-plugin
+  @typescript-eslint/parser
+  prettier
+  prettier-plugin-tailwindcss      # Auto-sort Tailwind classes
+
+
+==================================================
+SECTION 6: TYPE DEFINITIONS
+==================================================
+
+-- types/api.types.ts --
+
+interface ApiResponse<T> {
+  success: boolean
+  status_code: number
+  message: string
+  data: T
+  meta?: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
+  errors?: unknown
+  correlation_id?: string
+  timestamp: string
+}
+
+interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  meta: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
+}
+
+interface ApiError {
+  success: false
+  status_code: number
+  message: string
+  errors?: unknown
+  correlation_id: string
+  timestamp: string
+}
+
+
+-- types/user.types.ts --
+
+type UserRole = 'superadmin' | 'editor'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  role: UserRole
+  avatarUrl: string | null
+  isActive: boolean
+  lastLoginAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+interface AuthUser {
+  id: string
+  name: string
+  role: UserRole
+  avatarUrl: string | null
+}
+
+
+-- types/category.types.ts --
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+
+-- types/tag.types.ts --
+
+interface Tag {
+  id: string
+  name: string
+  slug: string
+  createdAt: string
+}
+
+
+-- types/image.types.ts --
+
+interface BlogImage {
+  id: string
+  blogId: string | null
+  githubPath: string
+  cdnUrl: string
+  width: number
+  height: number
+  fileSizeBytes: number
+  mimeType: string
+  altText: string | null
+  uploadedBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+Note: The backend processes each upload into a single optimized WebP image
+(max 1600px width, quality 82). There are NO image variants (sm/md/lg/og).
+Next.js Image component handles responsive sizing natively via its built-in
+srcSet and sizes attributes.
+
+
+-- types/blog.types.ts --
+
+type BlogStatus = 'draft' | 'published'
+
+interface Blog {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  contentHtml: string
+  authorId: string
+  categoryId: string | null
+  status: BlogStatus
+  isFeatured: boolean
+  publishedAt: string | null
+  readTimeMinutes: number
+  // SEO
+  seoTitle: string | null
+  seoDescription: string | null
+  canonicalUrl: string | null
+  focusKeyword: string | null
+  structuredData: Record<string, unknown> | null
+  // OG
+  ogImageUrl: string | null
+  ogTitle: string | null
+  ogDescription: string | null
+  // Relations
+  author?: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl' | 'role'>
+  category?: Category | null
+  tags?: Tag[]
+  images?: BlogImage[]
+  blogAnalytics?: BlogAnalytics
+  createdAt: string
+  updatedAt: string
+}
+
+interface BlogListItem {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  status: BlogStatus
+  isFeatured: boolean
+  publishedAt: string | null
+  readTimeMinutes: number
+  ogImageUrl: string | null
+  authorId: string
+  categoryId: string | null
+  author?: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl' | 'role'>
+  category?: Pick<Category, 'id' | 'name' | 'slug'> | null
+  tags?: Pick<Tag, 'id' | 'name' | 'slug'>[]
+  createdAt: string
+  updatedAt: string
+}
+
+// Request payload types strictly use snake_case per validator constraints
+interface CreateBlogPayload {
+  title: string
+  slug?: string
+  excerpt?: string
+  content_html: string
+  category_id?: string
+  tags?: string[]
+  status?: BlogStatus
+  is_featured?: boolean
+  published_at?: string
+  seo_title?: string
+  seo_description?: string
+  canonical_url?: string
+  focus_keyword?: string
+  structured_data?: Record<string, unknown>
+  og_image_url?: string
+  og_title?: string
+  og_description?: string
+}
+
+type UpdateBlogPayload = Partial<CreateBlogPayload>
+
+
+-- types/analytics.types.ts --
+
+interface BlogAnalytics {
+  id: string
+  blogId: string
+  totalViews: string       // string to prevent JS BIGINT precision loss
+  uniqueVisitors: string   // string to prevent JS BIGINT precision loss
+  avgReadTimeSec: number
+  bounceCount: string      // string to prevent JS BIGINT precision loss
+  lastViewedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+interface TrendingTag {
+  id: string
+  name: string
+  slug: string
+  totalViews: string
+}
+
+interface SearchLogItem {
+  id: string
+  query: string
+  searchedAt: string
+}
+
+interface AnalyticsOverview {
+  counts: {
+    totalBlogs: number
+    publishedBlogs: number
+    totalViews: string | number
+  }
+  topBlogs: (BlogAnalytics & { blog: Pick<Blog, 'id' | 'title' | 'slug' | 'status'> })[]
+  trendingTags: TrendingTag[]
+  recentSearches: SearchLogItem[]
+}
+
+
+-- types/ad.types.ts --
+
+type AdPlacement =
+  | 'HOME_TOP' | 'HOME_MIDDLE' | 'HOME_BOTTOM'
+  | 'SEARCH_TOP' | 'SEARCH_INLINE' | 'SEARCH_BOTTOM'
+  | 'BLOG_TOP' | 'BLOG_INLINE_1' | 'BLOG_INLINE_2'
+  | 'BLOG_BOTTOM' | 'BLOG_SIDEBAR'
+
+type DeviceTarget = 'all' | 'desktop' | 'mobile'
+
+interface AdUnit {
+  id: string
+  name: string
+  placement: AdPlacement
+  adScript: string
+  deviceTarget: DeviceTarget
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+
+-- types/error-log.types.ts --
+
+interface ErrorLog {
+  id: string
+  correlationId: string
+  errorCode: string
+  errorMessage: string
+  stackTrace: string | null
+  fileName: string | null
+  functionName: string | null
+  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL'
+  errorType: string
+  requestUrl: string | null
+  requestMethod: string | null
+  ipAddress: string | null
+  userId: string | null
+  createdAt: string
+  updatedAt: string
+  User?: User | null
+}
+
+
+==================================================
+SECTION 7: API CLIENT CONFIGURATION
+==================================================
+
+-- lib/api/adminClient.ts --
+
+Setup: Admin Axios instance
+baseURL          : envConfig.apiUrl + '/api/v1/admin'
+withCredentials  : true (send HTTP-only refresh token cookie)
+timeout          : 15000ms
+headers:
+  Content-Type   : application/json
+
+Request interceptor:
+  - Attach accessToken from Redux store (authSlice) to Authorization header
+
+Response interceptor:
+  - On success (2xx): return response
+  - On 401 error:
+      → Check if request is NOT already a retry
+      → Call POST /auth/refresh (via adminClient)
+      → If refresh success:
+          → Dispatch setAccessToken to Redux store
+          → Retry original request with new token
+      → If refresh fails:
+          → Dispatch clearAuth action (logout)
+          → Redirect to /login
+
+Error normalization:
+  - Extract response.data.message or fallback to 'Something went wrong'
+  - Re-throw structured ApiError
+
+
+-- lib/api/publicClient.ts --
+
+Setup: Public Axios instance
+baseURL          : envConfig.apiUrl + '/api/v1/public'
+withCredentials  : false (No auth cookies needed for public access)
+timeout          : 15000ms
+headers:
+  Content-Type   : application/json
+
+Response interceptor:
+  - On success (2xx): return response
+  - Error normalization: Extract response.data.message or fallback
+
+
+==================================================
+ADMIN APIs (lib/api/admin/)
+==================================================
+
+-- auth.api.ts --
+login(email, password) → POST /auth/login
+logout()               → POST /auth/logout
+refreshToken()         → POST /auth/refresh
+getMe()                → GET /auth/me
+
+-- blogs.api.ts --
+getAdminBlogs(params)  → GET /blogs
+getAdminBlog(id)       → GET /blogs/:id
+getAdminBlogBySlug(slug) → GET /blogs/slug/:slug
+createBlog(payload)    → POST /blogs
+updateBlog(id, payload)→ PUT /blogs/:id
+deleteBlog(id)         → DELETE /blogs/:id
+updateBlogStatus(id, status, publishedAt?) → PATCH /blogs/:id/status
+
+-- categories.api.ts --
+getAdminCategories(includeInactive?) → GET /categories
+getAdminCategory(slug)               → GET /categories/:slug
+createCategory(payload)              → POST /categories
+updateCategory(id, payload)          → PUT /categories/:id
+deleteCategory(id)                   → DELETE /categories/:id
+
+-- tags.api.ts --
+getAdminTags(popular?)               → GET /tags
+getAdminTag(slug)                    → GET /tags/:slug
+createTag(payload)                   → POST /tags
+updateTag(id, payload)               → PUT /tags/:id
+deleteTag(id)                        → DELETE /tags/:id
+
+-- images.api.ts --
+getAdminImages(params)               → GET /images (paginated: ?page=1&limit=10)
+uploadImage(formData)                → POST /images/upload (multipart/form-data)
+getBlogImages(blogId)                → GET /images/blog/:blogId
+deleteImage(id)                      → DELETE /images/:id
+
+-- analytics.api.ts --
+getOverview()                        → GET /analytics/overview
+getBlogStats(blogId)                 → GET /analytics/blogs/:id
+getSearchTrends(limit?)              → GET /analytics/search-trends
+
+-- ads.api.ts --
+getAdminAds()                        → GET /ads
+createAd(payload)                    → POST /ads
+updateAd(id, payload)                → PATCH /ads/:id
+deleteAd(id)                         → DELETE /ads/:id
+
+-- error-logs.api.ts --
+getAdminErrorLogs(params)            → GET /error-logs (paginated: ?page=1&limit=20)
+clearAllErrorLogs()                  → DELETE /error-logs
+bulkDeleteErrorLogs(ids)             → POST /error-logs/bulk-delete (body: { ids })
+
+
+==================================================
+PUBLIC APIs (lib/api/public/)
+==================================================
+
+-- blogs.api.ts --
+getPublicBlogs(params)               → GET /blogs
+getPublicBlogBySlug(slug)            → GET /blogs/:slug
+searchBlogs(query, page, limit)      → GET /search?q=...
+getBlogsByCategory(slug, ...)        → GET /search/category/:slug
+getBlogsByTag(slug, ...)             → GET /search/tag/:slug
+
+-- categories.api.ts --
+getPublicCategories()                → GET /categories
+getPublicCategoryBySlug(slug)        → GET /categories/:slug
+
+-- tags.api.ts --
+getPublicTags(popular?)              → GET /tags
+getPublicTagBySlug(slug)             → GET /tags/:slug
+
+-- ads.api.ts --
+getPublicAds(placement, device)      → GET /ads?placement=...&device=...
+
+-- analytics.api.ts --
+trackView(blogId, readTimeSec, isBounce) → POST /analytics/track/view
+
+
+==================================================
+SECTION 8: AUTHENTICATION & REDUX ARCHITECTURE
+==================================================
+
+Access Token Storage:
+  - Stored ONLY in Redux store via authSlice (in memory)
+  - NEVER stored in localStorage or sessionStorage
+  - Lost on page refresh → restored via /admin/auth/refresh call
+
+Refresh Token:
+  - Stored in HTTP-only cookie (set by backend)
+  - Sent automatically with every API request (withCredentials: true)
+  - Cannot be accessed by JavaScript
+
+Auth initialization flow (every page load):
+  1. App mounts → AuthProvider useEffect fires
+  2. Call GET /admin/auth/me (with cookie attached)
+  3. If 401: call POST /admin/auth/refresh
+  4. If refresh success: dispatch setAccessToken, call /admin/auth/me again
+  5. If refresh fails: user is unauthenticated, redirect to /login if on admin route
+  6. If /auth/me success: dispatch setAuth(user), mark as authenticated
+
+
+-- store/index.ts (Redux Toolkit Store) --
+
+import { configureStore } from '@reduxjs/toolkit'
+import authReducer from './slices/authSlice'
+import blogsReducer from './slices/blogsSlice'
+import categoriesReducer from './slices/categoriesSlice'
+import tagsReducer from './slices/tagsSlice'
+import adsReducer from './slices/adsSlice'
+import analyticsReducer from './slices/analyticsSlice'
+import blogEditorReducer from './slices/blogEditorSlice'
+import uiReducer from './slices/uiSlice'
+import errorLogsReducer from './slices/errorLogsSlice'
+
+export const store = configureStore({
+  reducer: {
+    auth: authReducer,
+    blogs: blogsReducer,
+    categories: categoriesReducer,
+    tags: tagsReducer,
+    ads: adsReducer,
+    analytics: analyticsReducer,
+    blogEditor: blogEditorReducer,
+    ui: uiReducer,
+    errorLogs: errorLogsReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // Ignore dates/complex payloads in thunks if needed
+    }),
+  devTools: process.env.NODE_ENV !== 'production',
+})
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch
+
+
+-- store/hooks.ts --
+
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState, AppDispatch } from '.'
+
+export const useAppDispatch = () => useDispatch<AppDispatch>()
+export const useAppSelector = <TSelected>(
+  selector: (state: RootState) => TSelected
+) => useSelector<RootState, TSelected>(selector)
+
+
+-- store/provider.tsx --
+
+'use client'
+
+import { Provider } from 'react-redux'
+import { store } from '.'
+
+export function ReduxProvider({ children }: { children: React.ReactNode }) {
+  return <Provider store={store}>{children}</Provider>
+}
+
+
+==================================================
+REDUX CLIENT SLICES (store/slices/)
+==================================================
+
+-- slices/authSlice.ts --
+
+State:
+  accessToken    : string | null
+  user           : AuthUser | null
+  isLoading      : boolean
+  isAuthenticated: boolean
+
+Reducers (Actions):
+  setAuth(state, action: { accessToken, user })
+  setAccessToken(state, action: string)
+  clearAuth(state)
+  setLoading(state, action: boolean)
+
+
+-- slices/blogsSlice.ts --
+
+State:
+  adminBlogs     : BlogListItem[]
+  publicBlogs    : BlogListItem[]
+  currentBlog    : Blog | null
+  adminMeta      : { total: number; page: number; limit: number; totalPages: number } | null
+  publicMeta     : { total: number; page: number; limit: number; totalPages: number } | null
+  isLoading      : boolean
+  error          : string | null
+
+Async Thunks:
+  fetchAdminBlogs(params)  → GET /admin/blogs
+  fetchAdminBlogById(id)   → GET /admin/blogs/:id
+  fetchAdminBlogBySlug(slug) → GET /admin/blogs/slug/:slug
+  createBlog(payload)      → POST /admin/blogs
+  updateBlog({ id, payload }) → PUT /admin/blogs/:id
+  deleteBlog(id)           → DELETE /admin/blogs/:id
+  updateBlogStatus({ id, status }) → PATCH /admin/blogs/:id/status
+  fetchPublicBlogs(params) → GET /public/blogs
+  fetchPublicBlogBySlug(slug) → GET /public/blogs/:slug
+
+Extra Reducers (Builders):
+  - Handle pending, fulfilled, rejected lifecycle for all thunks.
+  - E.g., fetchAdminBlogs.fulfilled updates adminBlogs & adminMeta, resets isLoading.
+
+
+-- slices/categoriesSlice.ts --
+
+State:
+  adminCategories: Category[]
+  publicCategories: Category[]
+  isLoading      : boolean
+  error          : string | null
+
+Async Thunks:
+  fetchAdminCategories(includeInactive?) → GET /admin/categories
+  createCategory(payload)                → POST /admin/categories
+  updateCategory({ id, payload })        → PUT /admin/categories/:id
+  deleteCategory(id)                     → DELETE /admin/categories/:id
+  fetchPublicCategories()                → GET /public/categories
+
+
+-- slices/tagsSlice.ts --
+
+State:
+  adminTags      : Tag[]
+  publicTags     : Tag[]
+  isLoading      : boolean
+  error          : string | null
+
+Async Thunks:
+  fetchAdminTags(popular?)               → GET /admin/tags
+  createTag(payload)                     → POST /admin/tags
+  updateTag({ id, payload })             → PUT /admin/tags/:id
+  deleteTag(id)                          → DELETE /admin/tags/:id
+  fetchPublicTags(popular?)              → GET /public/tags
+
+
+-- slices/adsSlice.ts --
+
+State:
+  adminAds       : AdUnit[]
+  publicAds      : AdUnit[]
+  isLoading      : boolean
+  error          : string | null
+
+Async Thunks:
+  fetchAdminAds()                        → GET /admin/ads
+  createAd(payload)                      → POST /admin/ads
+  updateAd({ id, payload })              → PATCH /admin/ads/:id
+  fetchPublicAds({ placement, device })  → GET /public/ads
+
+
+-- slices/errorLogsSlice.ts --
+
+State:
+  errorLogs      : ErrorLog[]
+  meta           : PaginationMeta | null
+  isLoading      : boolean
+  error          : string | null
+
+Async Thunks:
+  fetchAdminErrorLogs(params)            → GET /admin/error-logs (paginated)
+  clearAllErrorLogs()                    → DELETE /admin/error-logs
+  bulkDeleteErrorLogs(ids)               → POST /admin/error-logs/bulk-delete (body: { ids })
+
+
+-- slices/analyticsSlice.ts --
+
+State:
+  overview       : AnalyticsOverview | null
+  blogStats      : BlogAnalytics | null
+  searchTrends   : SearchLogItem[]
+  isLoading      : boolean
+  error          : string | null
+
+Async Thunks:
+  fetchOverview()                        → GET /admin/analytics/overview
+  fetchBlogStats(blogId)                 → GET /admin/analytics/blogs/:blogId
+  fetchSearchTrends(limit?)              → GET /admin/analytics/search-trends
+  trackView({ blogId, readTimeSec, isBounce }) → POST /public/analytics/track/view
+
+
+-- slices/blogEditorSlice.ts --
+
+State:
+  isDirty        : boolean
+  currentBlogId  : string | null
+
+Reducers (Actions):
+  setDirty(state, action: boolean)
+  setCurrentBlogId(state, action: string | null)
+  clearEditor(state)
+
+
+-- slices/uiSlice.ts --
+
+State:
+  sidebarOpen    : boolean
+
+Reducers (Actions):
+  toggleSidebar(state)
+  setSidebarOpen(state, action: boolean)
+
+
+-- context/AuthContext.tsx --
+
+  Provider wraps entire app
+  On mount: run auth initialization flow above
+  Exposes: user, isAuthenticated, isLoading, login(), logout()
+
+
+-- middleware.ts (Next.js Middleware) --
+
+Protect /admin/* routes:
+  - Check for presence of refreshToken cookie
+  - If missing: redirect to /login
+  - If present: allow through (actual JWT validation happens on API calls)
+
+Note: Middleware checks cookie presence only, not validity.
+      Full auth validation happens via API interceptor.
+
+Protected route config:
+  matcher: ['/admin/:path*']
+
+
+==================================================
+SECTION 9: RENDERING STRATEGY
+==================================================
+
+--------------------------------------------------
+Home Page (/)
+--------------------------------------------------
+Strategy    : ISR
+Revalidate  : 60 seconds
+Fetches     : Featured blog, recent blogs (10), categories, popular tags
+Why ISR     : Content changes infrequently, needs SEO, benefit from caching
+
+--------------------------------------------------
+Blog Detail (/:slug)
+--------------------------------------------------
+Strategy    : ISR
+Revalidate  : 120 seconds
+generateStaticParams: fetch all published blog slugs at build time
+Fetches     : Full blog data by slug
+Why ISR     : Individual blog pages are high-traffic, need fast TTFB + SEO
+
+--------------------------------------------------
+Search Page (/search)
+--------------------------------------------------
+Strategy    : SSR (dynamic per request)
+Why SSR     : Search query in URL params, results are dynamic, still indexable
+
+--------------------------------------------------
+Category Search (/search/category/:slug)
+--------------------------------------------------
+Strategy    : ISR per category slug
+Revalidate  : 120 seconds
+Why ISR     : Category pages are stable, SEO-indexable
+
+--------------------------------------------------
+Tag Search (/search/tag/:slug)
+--------------------------------------------------
+Strategy    : ISR per tag slug
+Revalidate  : 120 seconds
+
+--------------------------------------------------
+Admin Panel (/admin/*)
+--------------------------------------------------
+Strategy    : CSR (Client-Side Rendering)
+Why CSR     : Requires auth, no SEO needed, dynamic data
+How         : All admin pages use 'use client' + Redux state (useAppSelector & useAppDispatch with thunks)
+
+
+==================================================
+SECTION 10: SEO IMPLEMENTATION
+==================================================
+
+--------------------------------------------------
+generateMetadata (per route)
+--------------------------------------------------
+
+Root layout (layout.tsx):
+  metadataBase    : new URL(NEXT_PUBLIC_SITE_URL)
+  default title   : { default: SITE_NAME, template: '%s | SITE_NAME' }
+  description     : default site description
+  robots          : { index: true, follow: true }
+  openGraph:
+    type          : website
+    siteName      : SITE_NAME
+    locale        : en_US
+  twitter:
+    card          : summary_large_image
+    creator       : @twitterhandle
+
+Blog Detail page generateMetadata:
+  Fetch blog by slug
+  Return:
+    title         : blog.seo_title || blog.title
+    description   : blog.seo_description || blog.excerpt
+    alternates:
+      canonical   : blog.canonical_url || full blog URL
+    keywords      : blog.focus_keyword + tag names
+    openGraph:
+      type        : article
+      title       : blog.og_title || blog.seo_title || blog.title
+      description : blog.og_description || blog.seo_description
+      images      : [{ url: blog.og_image_url, width: 1200, height: 630 }]
+      publishedTime: blog.published_at
+      modifiedTime : blog.updated_at
+      authors      : [blog.author.name]
+      tags         : tag names array
+    twitter:
+      card        : summary_large_image
+      title       : blog.og_title || blog.title
+      description : blog.og_description
+      images      : [blog.og_image_url]
+
+Category page generateMetadata:
+  title           : category.meta_title || `${category.name} - Blogs`
+  description     : category.meta_description
+
+Tag page generateMetadata:
+  title           : `Blogs tagged ${tag.name}`
+
+Search page generateMetadata:
+  title           : `Search results for "${q}"`
+  robots          : { index: false, follow: false }
+
+
+--------------------------------------------------
+Structured Data (JSON-LD)
+--------------------------------------------------
+
+Component: components/seo/JsonLd.tsx
+  Accepts: data (object or array)
+  Renders: <script type="application/ld+json"> in <head>
+
+Blog Detail:
+  Type      : Article
+  Fields    : headline, description, image, datePublished, dateModified,
+              author (Person), publisher (Organization), mainEntityOfPage
+
+Home Page:
+  Type      : WebSite
+  Fields    : name, url, potentialAction (SearchAction with target URL)
+
+Breadcrumb:
+  Type      : BreadcrumbList
+  Generated : On blog detail and category/tag pages
+
+
+--------------------------------------------------
+Sitemap
+--------------------------------------------------
+
+File: src/app/sitemap.ts (Next.js dynamic sitemap)
+
+Returns:
+  Static routes:
+    - / (home)
+    - /search
+  Dynamic routes:
+    - Fetch all published blog slugs → /:slug
+    - Fetch all categories → /search/category/:slug
+    - Fetch all tags → /search/tag/:slug
+  Priority:
+    - / : 1.0
+    - /:slug (blog) : 0.8
+    - /search/category/* : 0.6
+    - /search/tag/* : 0.5
+  changeFrequency:
+    - / : daily
+    - /:slug : weekly
+
+
+--------------------------------------------------
+robots.txt
+--------------------------------------------------
+
+File: public/robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Sitemap: https://yourdomain.com/sitemap.xml
+
+
+==================================================
+SECTION 11: PAGE IMPLEMENTATIONS
+==================================================
+
+--------------------------------------------------
+Home Page (src/app/page.tsx)
+--------------------------------------------------
+
+Type        : async Server Component
+Rendering   : ISR, revalidate: 60
+
+Data fetched (server-side, parallel with Promise.all):
+  - Featured blog (is_featured=true, latest)
+  - Recent blogs (page=1, limit=9)
+  - All active categories with blog counts
+  - Popular tags (top 15 by blog count)
+  - Ad units for HOME_TOP, HOME_MIDDLE, HOME_BOTTOM
+
+Component structure:
+  <main>
+    <AdUnit placement="HOME_TOP" />
+    <HeroSection featuredBlog={featuredBlog} />
+    <section>
+      <RecentBlogs blogs={recentBlogs} />
+      <aside>
+        <SearchBar />
+        <CategoriesSection categories={categories} />
+        <PopularTags tags={tags} />
+        <AdUnit placement="HOME_MIDDLE" />
+      </aside>
+    </section>
+    <AdUnit placement="HOME_BOTTOM" />
+  </main>
+
+
+--------------------------------------------------
+Blog Detail Page (src/app/(public)/[slug]/page.tsx)
+--------------------------------------------------
+
+Type        : async Server Component
+Rendering   : ISR, revalidate: 120
+
+generateStaticParams:
+  Fetch all published blog slugs
+  Return: [{ slug: 'blog-slug-1' }, ...]
+
+generateMetadata:
+  Fetch blog by slug
+  Return full SEO metadata (see Section 10)
+
+Data fetched:
+  - Full blog by slug (with tags, category, author, images)
+  - Related blogs (same category, exclude current, limit 3)
+  - Ad units for BLOG_TOP, BLOG_INLINE_1, BLOG_INLINE_2,
+                  BLOG_BOTTOM, BLOG_SIDEBAR
+
+If blog not found: notFound() → triggers not-found.tsx
+
+Component structure:
+  <article>
+    <Breadcrumb items={[Home, Category, Blog Title]} />
+    <AdUnit placement="BLOG_TOP" />
+    <header>
+      <h1>{blog.title}</h1>
+      <BlogMeta author={author} date={published_at} readTime={read_time_minutes} />
+      <CategoryBadge />
+      <TagList tags={tags} />
+    </header>
+    <FeaturedImage image={blog.images[0]} fallbackAlt={blog.title} />
+    <div class="blog-layout">
+      <div class="blog-main">
+        <AdUnit placement="BLOG_INLINE_1" />
+        <BlogContent html={content_html} />
+        <AdUnit placement="BLOG_INLINE_2" />
+      </div>
+      <aside>
+        <TableOfContents />
+        <AdUnit placement="BLOG_SIDEBAR" />
+      </aside>
+    </div>
+    <AdUnit placement="BLOG_BOTTOM" />
+    <RelatedBlogs blogs={relatedBlogs} />
+    <JsonLd data={articleStructuredData} />
+    <JsonLd data={breadcrumbStructuredData} />
+  </article>
+
+Client components within page:
+  - ReadingProgress (scroll-based progress bar)
+  - TableOfContents (scroll-spy)
+  - ViewTracker (fires analytics tracking on mount + unmount)
+
+
+--------------------------------------------------
+ViewTracker Component
+--------------------------------------------------
+
+'use client'
+
+On mount:
+  - Record start timestamp
+
+On unmount (return from useEffect):
+  - Calculate readTimeSec = Date.now() - startTime
+  - Determine isBounce = readTimeSec < 30 seconds
+  - Call analytics.api.trackView(blogId, readTimeSec, isBounce)
+  - Fire and forget (no await needed)
+
+
+--------------------------------------------------
+Search Page (src/app/(public)/search/page.tsx)
+--------------------------------------------------
+
+Type        : async Server Component
+Rendering   : SSR (dynamic)
+
+Reads:      searchParams.q, searchParams.page
+Fetches:    searchBlogs(q, page, 10) + ad units for SEARCH_TOP, SEARCH_BOTTOM
+Logs:       Search query (handled by backend)
+
+Component structure:
+  <main>
+    <SearchBar initialValue={q} />
+    <AdUnit placement="SEARCH_TOP" />
+    <h1>Results for "{q}"</h1>
+    <SearchResults blogs={results} />
+    <Pagination total={total} page={page} />
+    <AdUnit placement="SEARCH_BOTTOM" />
+  </main>
+
+
+--------------------------------------------------
+Category Page (src/app/(public)/search/category/[slug]/page.tsx)
+--------------------------------------------------
+
+Type        : async Server Component
+Rendering   : ISR, revalidate: 120
+
+generateStaticParams: fetch all active category slugs
+
+Data fetched:
+  - Category details by slug
+  - Blogs by category (paginated)
+
+Page title: Dynamic (see Section 10)
+
+
+--------------------------------------------------
+Tag Page (src/app/(public)/search/tag/[slug]/page.tsx)
+--------------------------------------------------
+
+Same pattern as Category Page, using tag slug.
+
+
+--------------------------------------------------
+Custom 404 (src/app/not-found.tsx)
+--------------------------------------------------
+
+Type        : Server Component
+
+Sections:
+  - Large 404 illustration/icon (SVG)
+  - "Page not found" heading
+  - SearchBar component
+  - Trending blogs (fetch top 5 by views, server-side)
+  - Home redirect button
+
+Note: Do NOT fetch on every 404 hit for trending blogs in production.
+      Use a short ISR or cached fetch with revalidate: 300.
+
+
+--------------------------------------------------
+Admin Dashboard (/admin)
+--------------------------------------------------
+
+'use client'
+
+Uses Redux Thunk:
+  dispatch(fetchOverview()) and read state.analytics.overview
+
+Displays:
+  - Stats cards: total blogs, published, total views, visitors
+  - Top 5 blogs table with view counts
+  - Trending tags list
+  - Recent searches list
+  - Quick actions: New Blog, Manage Ads
+
+
+--------------------------------------------------
+Admin Blog List (/admin/blogs)
+--------------------------------------------------
+
+'use client'
+
+State: page, limit, status filter, search query
+Uses: dispatch(fetchAdminBlogs(params)) and read state.blogs.adminBlogs
+
+Features:
+  - Search input with 400ms debounce
+  - Status filter tabs: All / Published / Draft
+  - BlogTable with columns:
+      Title, Category, Status, Views, Published Date, Actions
+  - Actions: Edit, Preview, Delete, Toggle Status
+  - Pagination
+
+
+--------------------------------------------------
+Admin Blog Editor (/admin/blogs/new + /admin/blogs/[id])
+--------------------------------------------------
+
+'use client'
+
+Two modes: CREATE (no id) and EDIT (with id)
+On EDIT: fetch blog by id via dispatch(fetchAdminBlogById(id)) and populate form
+
+Form library: react-hook-form + Zod resolver
+
+Sections of BlogEditor:
+  Left (main):
+    - Title input
+    - Slug input (auto-generated from title, editable)
+    - Excerpt textarea
+    - RichTextEditor (TipTap) for content_html
+
+  Right panel (sticky sidebar):
+    - PublishPanel:
+        Status toggle (Draft / Published)
+        Published date picker
+        Is Featured toggle
+        Save Draft button
+        Publish button
+
+    - ImageUploader:
+        Drag-and-drop zone
+        Upload to /images/upload
+        Show uploaded image preview with CDN URL
+        Set og_image_url from the uploaded image's cdn_url
+
+    - CategorySelector:
+        Single-select dropdown from categories
+
+    - TagInput:
+        Combobox with create-on-enter
+        Shows existing tags with remove button
+
+    - SeoPanel:
+        SEO title (char counter, max 160)
+        SEO description (char counter, max 320)
+        Focus keyword
+        Canonical URL
+        OG title
+        OG description
+        OG image picker
+        Structured data textarea (JSON)
+
+On submit:
+  - Validate with Zod schema
+  - createBlog or updateBlog via API
+  - Show toast notification
+  - On success: redirect to /admin/blogs
+
+
+--------------------------------------------------
+Admin Blog Preview (/admin/blogs/[id]/preview)
+--------------------------------------------------
+
+'use client'
+
+Fetch blog by id
+Render same layout as public blog detail page
+Display "Preview Mode" banner at top
+Link back to edit page
+
+
+==================================================
+SECTION 12: COMPONENT SPECIFICATIONS
+==================================================
+
+--------------------------------------------------
+BlogCard.tsx
+--------------------------------------------------
+
+Props:
+  blog       : BlogListItem
+  variant?   : 'default' | 'compact' | 'featured'
+
+Renders:
+  - Next.js Image with CDN URL from blog.images[0] (or og_image_url fallback)
+  - Title as h2/h3 (linked to /:slug)
+  - Category badge
+  - Excerpt (truncated to 120 chars)
+  - Author name + published date + read time
+  - Tag list (max 3 shown)
+
+Image strategy:
+  - src={blog.images[0]?.cdn_url ?? blog.og_image_url ?? '/placeholder.jpg'}
+  - sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+  - Next.js Image component generates responsive srcSet automatically
+  - loading="lazy" for non-featured cards
+  - loading="eager" + priority for featured card
+
+
+--------------------------------------------------
+BlogContent.tsx
+--------------------------------------------------
+
+'use client' (for TableOfContents scroll-spy)
+
+Props:
+  html       : string (sanitized content_html from API)
+
+Renders:
+  - <div dangerouslySetInnerHTML={{ __html: html }} />
+  - Apply class: "blog-typography" (styles from typography.css)
+
+Security note:
+  - Content is sanitized on the BACKEND before saving
+  - Frontend renders trusted content only
+  - Do NOT re-sanitize on frontend (unnecessary, may break valid HTML)
+
+
+--------------------------------------------------
+AdUnit.tsx
+--------------------------------------------------
+
+'use client' (uses useEffect for script injection)
+
+Props:
+  placement  : AdPlacement
+  className? : string
+
+Behavior:
+  - On mount: fetch ad units by placement + device (via useAds hook)
+  - If no active ad: return null (render nothing)
+  - Inject ad_script safely via useEffect + innerHTML
+  - Re-run effect if placement changes
+
+Device detection:
+  - Check window.innerWidth
+  - mobile: < 768px
+  - desktop: >= 768px
+  - Send device param to /ads query
+
+Important:
+  - Wrap injection in try/catch
+  - Never inject ad_script during SSR (client-only)
+
+
+--------------------------------------------------
+RichTextEditor.tsx
+--------------------------------------------------
+
+'use client'
+
+Uses: TipTap with extensions:
+  StarterKit (h1-h6, p, blockquote, code, pre, lists, bold, italic, strike)
+  Link (href, target, rel)
+  Image (src, alt, width, height)
+  Placeholder
+  CodeBlockLowlight (with syntax highlighting)
+
+Toolbar buttons:
+  Headings (H2, H3, H4)
+  Bold, Italic, Strike
+  Ordered list, Bullet list
+  Blockquote
+  Code, Code block
+  Link insert/edit
+  Image insert (opens ImagePicker)
+  Undo, Redo
+
+Output:
+  editor.getHTML() → raw HTML string
+  Passed to form as content_html
+
+Props:
+  value      : string (initial HTML)
+  onChange   : (html: string) => void
+
+
+--------------------------------------------------
+ImageUploader.tsx
+--------------------------------------------------
+
+'use client'
+
+Uses: react-dropzone
+
+Props:
+  blogId     : string | undefined
+  onUpload   : (image: BlogImage) => void
+
+Behavior:
+  1. Drop or click to select file
+  2. Validate: MIME (jpeg/png/webp/gif), size (<5MB) on client
+  3. Build FormData: append file, blog_id, alt_text
+  4. Call images.api.uploadImage(formData)
+  5. Show upload progress indicator
+  6. On success: display single image preview with CDN URL + dimensions
+  7. Call onUpload(image) to pass the BlogImage record to parent form
+
+State:
+  isUploading: boolean
+  uploadedImage: BlogImage | null
+  error: string | null
+
+
+--------------------------------------------------
+TableOfContents.tsx
+--------------------------------------------------
+
+'use client'
+
+Behavior:
+  1. On mount: query DOM for h2, h3 elements in .blog-typography
+  2. Build TOC tree from headings
+  3. Add IntersectionObserver to each heading
+  4. Highlight active heading as user scrolls
+  5. Click → smooth scroll to heading
+
+Props:
+  contentSelector : string (CSS selector for blog content container)
+
+
+--------------------------------------------------
+Pagination.tsx
+--------------------------------------------------
+
+Props:
+  total      : number
+  page       : number
+  limit      : number
+  onPageChange: (page: number) => void (admin CSR)
+  OR
+  basePath   : string (public SSR: builds ?page= URLs)
+
+Renders:
+  - Previous / Next buttons
+  - Page number buttons (show 5 around current)
+  - "1 ... 4 5 6 ... 20" ellipsis pattern
+
+
+--------------------------------------------------
+SearchBar.tsx
+--------------------------------------------------
+
+'use client'
+
+Props:
+  initialValue?  : string
+  onSearch?      : (q: string) => void (admin inline)
+  navigateTo?    : boolean (public: navigate to /search?q=)
+
+Behavior:
+  - Controlled input with 400ms debounce
+  - On submit: router.push('/search?q=...') for public
+  - Clear button when value present
+  - Keyboard: Enter to submit, Escape to clear
+
+
+==================================================
+==================================================
+SECTION 13: STATE MANAGEMENT STRATEGY
+==================================================
+
+All states (server-fetched API data and client-only UI configurations) are fully unified under Redux Toolkit (RTK) using createAsyncThunk. This eliminates the need for TanStack Query entirely, providing a predictable, single source of truth for the entire Admin SPA.
+
+--------------------------------------------------
+State Architecture & Lifecycle
+--------------------------------------------------
+
+1. Store Structure:
+   The store contains dedicated thunk-driven slices for all entities:
+   - auth (Token, active profile, authenticating status)
+   - blogs (Admin feed, public feed, current editor blog, metas)
+   - categories (Categories lists, active taxonomies)
+   - tags (Manually configured / popular taxonomies)
+   - ads (Configuration scripts, placements)
+   - analytics (Macro dashboard overview, specific blog metrics)
+   - blogEditor (Unsaved dirty states)
+   - ui (Global navigation elements)
+
+2. Thunk Lifecycle Handling (Builder Pattern):
+   For every createAsyncThunk, the slice's extraReducers handles three distinct builder states:
+   - pending   : Set isLoading to true, clear previous error.
+   - fulfilled : Update state items/details, save meta (if paginated), set isLoading to false.
+   - rejected  : Set isLoading to false, capture and store error.message.
+
+
+--------------------------------------------------
+Caching, Fetching & Refetching Patterns
+--------------------------------------------------
+
+1. Caching & Stale Prevention:
+   To mimic automatic cache checking, components read the lists or entity data directly from the Redux state via useAppSelector. If data is already populated, the component can skip dispatching the fetch thunk unless:
+   - A forceRefetch flag is explicitly passed.
+   - The component is mounting for the first time in a fresh navigation.
+   - A thunk-based mutation (e.g. create, update, delete) has run.
+
+2. Mutation & Invalidation equivalent:
+   Whenever an API mutation occurs, the thunk action must be successfully completed before updating the local store state. To ensure state consistency:
+   - Execute the thunk mutation, using `.unwrap()` to catch any HTTP/validator exceptions.
+   - On mutation fulfillment, dispatch the refetch thunk immediately to sync state back with the server.
+
+   Example:
+   ```typescript
+   const handleSave = async (data) => {
+     try {
+       // 1. Dispatch update mutation thunk and unwrap payload
+       await dispatch(updateBlog({ id: blogId, payload: data })).unwrap()
+       toast.success('Blog updated successfully')
+       
+       // 2. Invalidate/refetch to sync the list
+       dispatch(fetchAdminBlogs({ page: 1, limit: 10 }))
+     } catch (err) {
+       toast.error(err || 'Failed to update blog')
+     }
+   }
+   ```
+
+
+--------------------------------------------------
+Detailed Redux State Schema
+--------------------------------------------------
+
+-- slices/blogsSlice.ts --
+State:
+  adminBlogs: BlogListItem[]
+  publicBlogs: BlogListItem[]
+  currentBlog: Blog | null
+  adminMeta: PaginationMeta | null
+  publicMeta: PaginationMeta | null
+  isLoading: boolean
+  error: string | null
+
+Actions (standard reducers):
+  - resetCurrentBlog: Sets currentBlog to null (when exiting the editor)
+
+Thunks:
+  - fetchAdminBlogs(params) -> GET /admin/blogs
+  - fetchAdminBlogById(id) -> GET /admin/blogs/:id
+  - fetchAdminBlogBySlug(slug) -> GET /admin/blogs/slug/:slug
+  - createBlog(payload) -> POST /admin/blogs
+  - updateBlog({ id, payload }) -> PUT /admin/blogs/:id
+  - deleteBlog(id) -> DELETE /admin/blogs/:id
+  - updateBlogStatus({ id, status }) -> PATCH /admin/blogs/:id/status
+  - fetchPublicBlogs(params) -> GET /public/blogs
+  - fetchPublicBlogBySlug(slug) -> GET /public/blogs/:slug
+
+
+-- slices/categoriesSlice.ts --
+State:
+  adminCategories: Category[]
+  publicCategories: Category[]
+  isLoading: boolean
+  error: string | null
+
+Thunks:
+  - fetchAdminCategories(includeInactive?) -> GET /admin/categories
+  - createCategory(payload) -> POST /admin/categories
+  - updateCategory({ id, payload }) -> PUT /admin/categories/:id
+  - deleteCategory(id) -> DELETE /admin/categories/:id
+  - fetchPublicCategories() -> GET /public/categories
+
+
+-- slices/tagsSlice.ts --
+State:
+  adminTags: Tag[]
+  publicTags: Tag[]
+  isLoading: boolean
+  error: string | null
+
+Thunks:
+  - fetchAdminTags(popular?) -> GET /admin/tags
+  - createTag(payload) -> POST /admin/tags
+  - updateTag({ id, payload }) -> PUT /admin/tags/:id
+  - deleteTag(id) -> DELETE /admin/tags/:id
+  - fetchPublicTags(popular?) -> GET /public/tags
+
+
+-- slices/adsSlice.ts --
+State:
+  adminAds: AdUnit[]
+  publicAds: AdUnit[]
+  isLoading: boolean
+  error: string | null
+
+Thunks:
+  - fetchAdminAds() -> GET /admin/ads
+  - createAd(payload) -> POST /admin/ads
+  - updateAd({ id, payload }) -> PATCH /admin/ads/:id
+  - deleteAd(id) -> DELETE /admin/ads/:id
+  - fetchPublicAds({ placement, device }) -> GET /public/ads
+
+
+-- slices/errorLogsSlice.ts --
+State:
+  errorLogs: ErrorLog[]
+  meta: PaginationMeta | null
+  isLoading: boolean
+  error: string | null
+
+Thunks:
+  - fetchAdminErrorLogs(params) -> GET /admin/error-logs (paginated)
+  - clearAllErrorLogs() -> DELETE /admin/error-logs
+  - bulkDeleteErrorLogs(ids) -> POST /admin/error-logs/bulk-delete (body: { ids })
+
+
+-- slices/analyticsSlice.ts --
+State:
+  overview: AnalyticsOverview | null
+  blogStats: BlogAnalytics | null
+  searchTrends: SearchLogItem[]
+  isLoading: boolean
+  error: string | null
+
+Thunks:
+  - fetchOverview() -> GET /admin/analytics/overview
+  - fetchBlogStats(blogId) -> GET /admin/analytics/blogs/:blogId
+  - fetchSearchTrends(limit?) -> GET /admin/analytics/search-trends
+  - trackView({ blogId, readTimeSec, isBounce }) -> POST /public/analytics/track/view
+
+
+==================================================
+SECTION 14: STYLING SYSTEM
+==================================================
+
+-- styles/globals.css --
+
+@import 'tailwindcss';
+
+CSS custom properties (design tokens):
+  --color-primary         : hsl(221 83% 53%)   /* blue */
+  --color-primary-hover   : hsl(221 83% 45%)
+  --color-secondary       : hsl(262 83% 58%)   /* purple */
+  --color-accent          : hsl(32 95% 55%)    /* orange */
+  --color-bg              : hsl(0 0% 100%)
+  --color-bg-subtle       : hsl(210 40% 98%)
+  --color-bg-muted        : hsl(210 40% 96%)
+  --color-border          : hsl(214 32% 91%)
+  --color-text            : hsl(222 47% 11%)
+  --color-text-muted      : hsl(215 16% 47%)
+  --color-text-subtle     : hsl(215 20% 65%)
+
+  --radius-sm             : 0.375rem
+  --radius-md             : 0.5rem
+  --radius-lg             : 0.75rem
+  --radius-xl             : 1rem
+
+  --shadow-sm, --shadow-md, --shadow-lg
+
+  --font-sans             : 'Inter', system-ui, sans-serif
+  --font-serif            : 'Merriweather', Georgia, serif  (for blog content)
+  --font-mono             : 'JetBrains Mono', monospace
+
+
+-- styles/typography.css --
+
+Applied via class="blog-typography" on BlogContent div
+
+Targets bare HTML tags rendered from content_html:
+
+.blog-typography h1 { font-size: 2rem; font-weight: 700; margin: 2rem 0 1rem; }
+.blog-typography h2 { font-size: 1.5rem; font-weight: 700; margin: 1.75rem 0 0.75rem; }
+.blog-typography h3 { font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+.blog-typography p  { line-height: 1.8; margin-bottom: 1.25rem; }
+.blog-typography a  { color: var(--color-primary); text-decoration: underline; }
+.blog-typography blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding-left: 1rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+.blog-typography pre {
+  background: hsl(220 13% 10%);
+  color: hsl(210 40% 96%);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  overflow-x: auto;
+}
+.blog-typography code {
+  background: var(--color-bg-muted);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+.blog-typography img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 1.5rem 0;
+}
+.blog-typography ul { list-style: disc; padding-left: 1.5rem; }
+.blog-typography ol { list-style: decimal; padding-left: 1.5rem; }
+.blog-typography li { margin-bottom: 0.5rem; line-height: 1.7; }
+.blog-typography table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+.blog-typography th,
+.blog-typography td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.blog-typography th { background: var(--color-bg-subtle); font-weight: 600; }
+.blog-typography hr { border: none; border-top: 1px solid var(--color-border); margin: 2rem 0; }
+
+
+-- Tailwind Config Notes --
+
+Extend theme with:
+  colors from CSS variables
+  fontFamily: sans, serif, mono
+  typography plugin for @tailwindcss/typography (prose)
+
+
+==================================================
+SECTION 15: IMAGE HANDLING ON FRONTEND
+==================================================
+
+Architecture Note:
+  The backend uploads a SINGLE optimized WebP image per upload request
+  (max 1600px width, quality 82). There are NO image variants.
+  Responsive image rendering is handled entirely by the Next.js Image
+  component, which generates its own srcSet from the single source URL.
+
+--------------------------------------------------
+Responsive Image Rendering
+--------------------------------------------------
+
+BlogCard image:
+  <Image
+    src={blog.images[0]?.cdn_url ?? blog.og_image_url ?? '/placeholder.jpg'}
+    alt={blog.images[0]?.alt_text ?? blog.title}
+    width={1200}
+    height={630}
+    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+    loading="lazy"
+    className="..."
+  />
+
+Featured image on blog detail:
+  <Image
+    src={blog.images[0]?.cdn_url ?? blog.og_image_url ?? '/placeholder.jpg'}
+    alt={blog.images[0]?.alt_text ?? blog.title}
+    width={1200}
+    height={630}
+    priority={true}
+    sizes="100vw"
+  />
+
+OG Image: og_image_url used only in metadata, not rendered.
+          Can be set from the uploaded image's cdn_url in the admin editor.
+
+
+--------------------------------------------------
+getImageUrl utility
+--------------------------------------------------
+
+File: src/lib/utils/getImageUrl.ts
+
+Input  : blog: Blog | BlogListItem
+Output : { src: string, alt: string }
+
+Logic:
+  1. If blog.images exists and has length > 0:
+     return { src: blog.images[0].cdn_url, alt: blog.images[0].alt_text ?? blog.title }
+  2. Else if blog.og_image_url:
+     return { src: blog.og_image_url, alt: blog.title }
+  3. Else:
+     return { src: '/placeholder.jpg', alt: blog.title }
+
+Usage in components to avoid repetitive null-check chains
+
+
+==================================================
+SECTION 16: ERROR HANDLING
+==================================================
+
+--------------------------------------------------
+Global error.tsx
+--------------------------------------------------
+
+Catches: Errors thrown in Server Components
+Renders: "Something went wrong" with retry button
+Log: console.error in development
+
+--------------------------------------------------
+API Error Handling Pattern
+--------------------------------------------------
+
+In Redux Thunks (Client API Calls):
+  Unwrap the dispatched thunk promise and catch the error. Show toast with the normalized message.
+
+In Server Components (SSR/ISR Fetchers):
+  Wrap fetch in try/catch
+  If 404 from API → call notFound()
+  If other error → throw Error (triggers error.tsx)
+
+In Admin mutations (e.g. Save, Delete):
+  Use the .unwrap() pattern on dispatch:
+  dispatch(mutateThunk(payload)).unwrap()
+    .then(() => {
+       toast.success('Action successful!');
+       dispatch(fetchRefreshThunk()); // Refresh state
+    })
+    .catch((err) => {
+       toast.error(err || 'Failed to complete action');
+    })
+
+--------------------------------------------------
+Not Found Handling
+--------------------------------------------------
+
+Blog detail (/:slug):
+  If API returns 404 → Next.js notFound() → not-found.tsx
+
+Admin blog editor (/admin/blogs/[id]):
+  If blog not found → redirect to /admin/blogs with toast error
+
+
+==================================================
+SECTION 17: PERFORMANCE OPTIMIZATIONS
+==================================================
+
+1. Image optimization:
+   - All images served as WebP from jsDelivr CDN
+   - Next.js Image component with proper sizes attribute
+   - priority=true only for above-the-fold images
+   - Lazy loading for all other images
+
+2. Font optimization:
+   - Use next/font for self-hosted or Google Fonts
+   - Subset: latin only
+   - display: 'swap'
+   - Preload critical font weights
+
+3. Code splitting:
+   - Admin panel components lazy-loaded (next/dynamic)
+   - RichTextEditor loaded only on editor page (heavy TipTap bundle)
+   - Admin analytics charts: next/dynamic with ssr: false
+
+4. ISR caching:
+   - Home page: 60s revalidate
+   - Blog pages: 120s revalidate
+   - Category/tag pages: 120s revalidate
+   - On-demand revalidation via /api/revalidate webhook
+
+5. Prefetching:
+   - next/link automatically prefetches in viewport
+   - No manual prefetch needed for blog list cards
+
+6. Bundle optimization:
+   - Tree-shake lucide-react (import individual icons)
+   - Analyze with @next/bundle-analyzer if needed
+
+7. Loading states:
+   - Skeleton screens for admin tables and blog lists
+   - Suspense boundaries in Server Components
+   - loading.tsx at route segment level
+
+8. Data deduplication:
+   - Same fetch in generateMetadata and page.tsx:
+     use React.cache() to deduplicate server-side fetch calls
+   - lib/fetchers use cache() wrapper
+
+
+==================================================
+SECTION 18: ISR REVALIDATION WEBHOOK
+==================================================
+
+File: src/app/api/revalidate/route.ts
+
+Purpose: Triggered by backend (after blog publish/update)
+to instantly invalidate ISR cache for specific pages
+
+Method: POST
+
+Auth: Check request header x-revalidate-secret === REVALIDATE_SECRET
+
+Body:
+  {
+    type: 'blog' | 'category' | 'tag' | 'home',
+    slug?: string
+  }
+
+Handler logic:
+  if type === 'blog' and slug:
+    revalidatePath(`/${slug}`)
+    revalidatePath('/') (home may show this blog)
+  if type === 'category' and slug:
+    revalidatePath(`/search/category/${slug}`)
+  if type === 'tag' and slug:
+    revalidatePath(`/search/tag/${slug}`)
+  if type === 'home':
+    revalidatePath('/')
+
+Returns: { revalidated: true, timestamp: Date.now() }
+
+Backend integration:
+  After blog publish/update → call this webhook
+  Fire and forget (no blocking)
+
+
+==================================================
+SECTION 19: ADMIN ROUTE GUARD PATTERN
+==================================================
+
+Layer 1: Next.js Middleware (middleware.ts)
+  - Check refreshToken cookie existence
+  - Redirect to /login if missing
+  - Fast, edge-runtime check
+
+Layer 2: AuthProvider (context/AuthContext.tsx)
+  - On mount: try to restore session via /auth/me
+  - If restore fails: redirect to /login
+  - Shows loading spinner during initialization
+
+Layer 3: API Interceptor (lib/api/adminClient.ts)
+  - On 401 response: attempt token refresh
+  - If refresh fails: clear auth + redirect to /login
+  - Handles token expiry mid-session
+
+Admin layout (/admin/layout.tsx):
+  - 'use client'
+  - Reads isAuthenticated from AuthContext
+  - If not authenticated + not loading: redirect to /login
+  - Renders Sidebar + AdminTopbar + children when authenticated
+
+
+==================================================
+SECTION 20: SEQUENTIAL TODO CHECKLIST
+==================================================
+
+--------------------------------------------------
+PHASE 1: PROJECT SETUP
+--------------------------------------------------
+
+[x] 1.01  Create Next.js project: npx create-next-app@latest
+          - TypeScript: yes
+          - Tailwind CSS: yes
+          - App Router: yes
+          - src/ directory: yes
+          - Import alias @/*: yes
+
+[x] 1.02  Install all production and dev dependencies (Section 5)
+
+[x] 1.03  Configure tsconfig.json
+          - Add all path aliases (@/*, @ui/*, @lib/*, etc.)
+          - Set strict: true
+
+[x] 1.04  Configure next.config.ts
+          - Remote image patterns (cdn.jsdelivr.net)
+          - Security headers
+          - reactStrictMode: true
+
+[x] 1.05  Configure tailwind.config.ts (Mapped via globals.css @theme in Tailwind v4)
+          - Add @tailwindcss/typography plugin
+          - Extend theme with font families
+
+[x] 1.06  Create .env.local and .env.example with all variables (Section 3)
+
+[x] 1.07  Create src/styles/globals.css
+          - @import tailwindcss
+          - All CSS custom properties (design tokens)
+
+[x] 1.08  Create src/styles/typography.css
+          - All .blog-typography styles (Section 14)
+
+[x] 1.09  Create src/lib/utils/cn.ts
+          - import clsx and twMerge
+          - export cn(...inputs) utility
+
+[x] 1.10  Create src/constants/routes.ts
+          - ROUTES.HOME, ROUTES.SEARCH, ROUTES.ADMIN, etc.
+
+[x] 1.11  Create src/store/index.ts (Redux Toolkit store initialization)
+
+[x] 1.12  Create src/constants/adPlacements.ts (all placement constants)
+
+[x] 1.13  Verify dev server starts: npm run dev
+
+--------------------------------------------------
+PHASE 2: TYPE DEFINITIONS
+--------------------------------------------------
+
+[x] 2.01  Create src/types/api.types.ts
+[x] 2.02  Create src/types/user.types.ts
+[x] 2.03  Create src/types/category.types.ts
+[x] 2.04  Create src/types/tag.types.ts
+[x] 2.05  Create src/types/image.types.ts
+[x] 2.06  Create src/types/blog.types.ts
+[x] 2.07  Create src/types/analytics.types.ts
+[x] 2.08  Create src/types/ad.types.ts
+[x] 2.09  Verify TypeScript compilation: npx tsc --noEmit
+
+--------------------------------------------------
+PHASE 3: API LAYER
+--------------------------------------------------
+
+[x] 3.01  Create src/lib/api/adminClient.ts
+          - Axios instance with baseURL (/api/v1/admin), withCredentials
+          - Request interceptor: attach accessToken from Redux store
+          - Response interceptor: 401 → refresh → retry logic
+          - Error normalization
+
+[x] 3.02  Create src/lib/api/publicClient.ts
+          - Axios instance with baseURL (/api/v1/public), no credentials
+          - Response interceptor for error normalization
+
+[x] 3.03  Create Admin APIs (src/lib/api/admin/*)
+          - [x] auth.api.ts, [x] blogs.api.ts, [x] categories.api.ts, [x] tags.api.ts, [x] images.api.ts, [x] analytics.api.ts, [x] ads.api.ts
+
+[x] 3.04  Create Public APIs (src/lib/api/public/*)
+          - [x] blogs.api.ts, [x] categories.api.ts, [x] tags.api.ts, [x] analytics.api.ts, [x] ads.api.ts
+
+[x] 3.09  Create src/lib/fetchers/blog.fetcher.ts
+          - Server-side fetch functions using React cache()
+          - getPublicBlogs, getPublicBlogBySlug, getRelatedBlogs
+
+[x] 3.10  Create src/lib/fetchers/category.fetcher.ts
+[x] 3.11  Create src/lib/fetchers/tag.fetcher.ts
+[x] 3.12  Create src/lib/fetchers/ad.fetcher.ts
+
+--------------------------------------------------
+PHASE 4: AUTH SYSTEM
+--------------------------------------------------
+
+[x] 4.01  Create src/store/index.ts (Redux Toolkit configureStore)
+          - Combine authSlice, blogEditorSlice, uiSlice reducers
+          - Export RootState and AppDispatch types
+          - Enable devTools in non-production
+
+[x] 4.02  Create src/store/hooks.ts
+          - Export typed useAppDispatch and useAppSelector hooks
+
+[x] 4.03  Create src/store/provider.tsx
+          - 'use client' Redux Provider wrapper component
+
+[x] 4.04  Create src/store/slices/authSlice.ts
+          - State: accessToken, user, isAuthenticated, isLoading
+          - Actions: setAuth, setAccessToken, clearAuth, setLoading
+
+[x] 4.05  Create src/store/slices/uiSlice.ts
+          - State: sidebarOpen
+          - Actions: toggleSidebar, setSidebarOpen
+
+[x] 4.06  Create src/store/slices/blogEditorSlice.ts
+          - State: isDirty, currentBlogId
+          - Actions: setDirty, clearEditor, setCurrentBlogId
+
+[x] 4.06a Create src/store/slices/blogsSlice.ts
+          - State: adminBlogs, publicBlogs, currentBlog, adminMeta, publicMeta, isLoading, error
+          - Thunks: fetchAdminBlogs, fetchAdminBlogById, fetchAdminBlogBySlug, createBlog, updateBlog, deleteBlog, updateBlogStatus, fetchPublicBlogs, fetchPublicBlogBySlug
+
+[x] 4.06b Create src/store/slices/categoriesSlice.ts
+          - State: adminCategories, publicCategories, isLoading, error
+          - Thunks: fetchAdminCategories, createCategory, updateCategory, deleteCategory, fetchPublicCategories
+
+[x] 4.06c Create src/store/slices/tagsSlice.ts
+          - State: adminTags, publicTags, isLoading, error
+          - Thunks: fetchAdminTags, createTag, updateTag, deleteTag, fetchPublicTags
+
+[x] 4.06d Create src/store/slices/adsSlice.ts
+          - State: adminAds, publicAds, isLoading, error
+          - Thunks: fetchAdminAds, createAd, updateAd, deleteAd, fetchPublicAds
+
+[x] 4.06e Create src/store/slices/analyticsSlice.ts
+          - State: overview, blogStats, searchTrends, isLoading, error
+          - Thunks: fetchOverview, fetchBlogStats, fetchSearchTrends, trackView
+
+[x] 4.06f Create src/store/slices/errorLogsSlice.ts
+          - State: errorLogs, meta, isLoading, error
+          - Thunks: fetchAdminErrorLogs, clearAllErrorLogs, bulkDeleteErrorLogs
+
+[x] 4.07  Create src/context/AuthContext.tsx
+          - Session initialization logic (Section 8)
+          - Uses useAppDispatch to dispatch setAuth / clearAuth
+          - Expose user, isAuthenticated, isLoading, login(), logout()
+
+[x] 4.08  Create src/context/ToastContext.tsx
+          - Wrap react-hot-toast
+
+[x] 4.09  Create src/middleware.ts
+          - Protect /admin/* routes
+          - Check refreshToken cookie presence
+          - Redirect to /login if missing
+
+[x] 4.10  Create src/app/layout.tsx (root layout)
+          - Wrap with ReduxProvider (store/provider.tsx)
+          - Wrap with AuthContext, ToastContext
+          - Import globals.css
+          - Set default metadata
+
+[x] 4.11  Create src/app/(admin)/login/page.tsx
+          - Login form with email/password
+          - react-hook-form + Zod validation
+          - On submit: call auth.api.login
+          - On success: dispatch setAuth + redirect to /admin
+          - On error: show toast
+
+[ ] 4.12  Test login flow end to end with running backend
+[ ] 4.13  Test middleware redirect on accessing /admin without cookie
+[ ] 4.14  Test token refresh: wait for access token expiry, verify retry works
+
+--------------------------------------------------
+PHASE 5: BASE UI COMPONENTS
+--------------------------------------------------
+
+[ ] 5.01  Create src/components/ui/Button.tsx
+          - Variants: primary, secondary, ghost, danger
+          - Sizes: sm, md, lg
+          - Loading state with Spinner
+
+[ ] 5.02  Create src/components/ui/Input.tsx
+          - Label, error message, helper text
+          - Forward ref for RHF compatibility
+
+[ ] 5.03  Create src/components/ui/Textarea.tsx
+[ ] 5.04  Create src/components/ui/Select.tsx
+[ ] 5.05  Create src/components/ui/Badge.tsx (category/tag chips)
+[ ] 5.06  Create src/components/ui/Card.tsx
+[ ] 5.07  Create src/components/ui/Modal.tsx (portal-based)
+[ ] 5.08  Create src/components/ui/Spinner.tsx
+[ ] 5.09  Create src/components/ui/Toast.tsx (using react-hot-toast)
+[ ] 5.10  Create src/components/ui/Breadcrumb.tsx
+[ ] 5.11  Create src/components/ui/Pagination.tsx (Section 12 spec)
+[ ] 5.12  Create src/components/ui/EmptyState.tsx
+[ ] 5.13  Create src/components/ui/Avatar.tsx
+
+--------------------------------------------------
+PHASE 6: PUBLIC LAYOUT AND HEADER/FOOTER
+--------------------------------------------------
+
+[ ] 6.01  Create src/components/layout/Header.tsx
+          - Logo/site name
+          - Navigation: Home, Categories dropdown, Search icon
+          - Mobile hamburger menu
+
+[ ] 6.02  Create src/components/layout/MobileMenu.tsx
+[ ] 6.03  Create src/components/layout/Footer.tsx
+          - Site name, links, copyright
+
+[ ] 6.04  Create src/app/(public)/layout.tsx
+          - Wrap with Header + Footer
+          - Max-width container
+
+--------------------------------------------------
+PHASE 7: HOME PAGE
+--------------------------------------------------
+
+[ ] 7.01  Create src/components/search/SearchBar.tsx
+[ ] 7.02  Create src/components/blog/BlogCard.tsx (Section 12 spec)
+[ ] 7.03  Create src/components/blog/BlogCardFeatured.tsx
+[ ] 7.04  Create src/components/home/HeroSection.tsx (featured blog)
+[ ] 7.05  Create src/components/home/RecentBlogs.tsx (blog grid)
+[ ] 7.06  Create src/components/home/CategoriesSection.tsx
+[ ] 7.07  Create src/components/home/PopularTags.tsx
+[ ] 7.08  Create src/components/ads/AdUnit.tsx (Section 12 spec)
+[ ] 7.09  Implement src/app/page.tsx (ISR, parallel data fetch)
+[ ] 7.10  Create src/lib/utils/getImageUrl.ts
+          - Extracts CDN URL from blog.images[0] with og_image_url and placeholder fallbacks
+[ ] 7.11  Create src/lib/utils/formatDate.ts (using date-fns)
+[ ] 7.12  Create src/lib/utils/formatReadTime.ts
+[ ] 7.13  Create src/lib/utils/truncateText.ts
+[ ] 7.14  Test home page renders with real API data
+[ ] 7.15  Verify ISR revalidate behavior (check Next.js cache headers)
+
+--------------------------------------------------
+PHASE 8: BLOG DETAIL PAGE
+--------------------------------------------------
+
+[ ] 8.01  Create src/components/blog/BlogMeta.tsx
+[ ] 8.02  Create src/components/blog/BlogContent.tsx
+[ ] 8.03  Create src/components/blog/TableOfContents.tsx
+[ ] 8.04  Create src/components/blog/RelatedBlogs.tsx
+[ ] 8.05  Create src/components/blog/ReadingProgress.tsx
+[ ] 8.06  Create ViewTracker client component (Section 11)
+[ ] 8.07  Create src/components/seo/JsonLd.tsx
+[ ] 8.08  Create src/lib/utils/buildMeta.ts (generateMetadata helper)
+[ ] 8.09  Implement src/app/(public)/[slug]/page.tsx
+          - generateStaticParams
+          - generateMetadata (Section 10)
+          - Full page layout (Section 11)
+          - JsonLd (Article + Breadcrumb)
+[ ] 8.10  Test blog detail page SEO: check <head> with browser devtools
+[ ] 8.11  Validate OpenGraph tags with og:debugger or similar tool
+[ ] 8.12  Test ViewTracker fires analytics on mount/unmount
+[ ] 8.13  Test TableOfContents scroll-spy on long articles
+[ ] 8.14  Verify responsive image rendering on mobile
+
+--------------------------------------------------
+PHASE 9: SEARCH PAGES
+--------------------------------------------------
+
+[ ] 9.01  Create src/components/search/SearchResults.tsx
+[ ] 9.02  Create src/components/search/SearchFilters.tsx
+[ ] 9.03  Implement src/app/(public)/search/page.tsx (SSR)
+[ ] 9.04  Implement src/app/(public)/search/category/[slug]/page.tsx (ISR)
+[ ] 9.05  Implement src/app/(public)/search/tag/[slug]/page.tsx (ISR)
+[ ] 9.06  Test search with query param ?q=...
+[ ] 9.07  Test empty results state
+[ ] 9.08  Test pagination on search results
+[ ] 9.09  Verify dynamic page titles in <head>
+
+--------------------------------------------------
+PHASE 10: CUSTOM 404 PAGE
+--------------------------------------------------
+
+[ ] 10.01 Implement src/app/not-found.tsx
+          - SVG 404 illustration
+          - SearchBar component
+          - Trending blogs (cached fetch, revalidate: 300)
+          - Home redirect button
+[ ] 10.02 Test by visiting /nonexistent-slug
+
+--------------------------------------------------
+PHASE 11: SITEMAP AND ROBOTS
+--------------------------------------------------
+
+[ ] 11.01 Create public/robots.txt (Section 10)
+[ ] 11.02 Implement src/app/sitemap.ts
+          - Static routes
+          - Dynamic blog slugs
+          - Category slugs
+          - Tag slugs
+[ ] 11.03 Test /sitemap.xml in browser → valid XML
+[ ] 11.04 Test /robots.txt renders correctly
+
+--------------------------------------------------
+PHASE 12: ADMIN LAYOUT AND NAVIGATION
+--------------------------------------------------
+
+[ ] 12.01 Create src/components/layout/Sidebar.tsx
+          - Logo
+          - Navigation items: Dashboard, Blogs, Categories, Tags, Images, Analytics, Ads
+          - Active route highlight
+          - Collapse on mobile
+
+[ ] 12.02 Create src/components/layout/AdminTopbar.tsx
+          - Page title
+          - User avatar dropdown: profile, logout
+
+[ ] 12.03 Implement src/app/(admin)/layout.tsx
+          - Auth guard (Section 19)
+          - Sidebar + Topbar layout
+          - Main content area
+
+[ ] 12.04 Create src/hooks/useAuth.ts
+          - Wrap AuthContext for easy access in components
+
+--------------------------------------------------
+PHASE 13: ADMIN DASHBOARD
+--------------------------------------------------
+
+[ ] 13.01 Create src/hooks/useAnalytics.ts
+[ ] 13.02 Create src/components/admin/AnalyticsDashboard.tsx
+          - Stats cards
+          - Top blogs table
+          - Trending tags list
+          - Recent searches list
+[ ] 13.03 Implement src/app/(admin)/admin/page.tsx
+
+[ ] 13.04 Implement src/app/(admin)/admin/analytics/page.tsx
+          - Detailed analytics panel utilizing Redux state selectors
+          - Stats tables, total view logs, trending search parameters, bounce analytics
+
+--------------------------------------------------
+PHASE 14: ADMIN BLOG MANAGEMENT
+--------------------------------------------------
+
+[ ] 14.01 Create src/hooks/useBlogs.ts (admin)
+[ ] 14.02 Create src/components/admin/BlogTable.tsx
+          - Columns: Title, Category, Tags, Status, Date, Actions
+          - Row actions: Edit, Preview, Delete, Toggle Status
+
+[ ] 14.03 Create src/components/admin/ConfirmDialog.tsx
+          - Modal with confirm/cancel for delete actions
+
+[ ] 14.04 Implement src/app/(admin)/admin/blogs/page.tsx
+          - Blog list with search, filter, pagination
+          - Delete with confirmation dialog
+
+--------------------------------------------------
+PHASE 15: ADMIN BLOG EDITOR
+--------------------------------------------------
+
+[ ] 15.01 Create src/components/admin/RichTextEditor.tsx
+          - TipTap setup with all extensions (Section 12)
+          - Full toolbar
+          - HTML input/output
+
+[ ] 15.02 Create src/components/admin/ImageUploader.tsx
+          - react-dropzone setup
+          - Client-side validation
+          - Upload + show single image preview with CDN URL
+
+[ ] 15.03 Create src/components/admin/ImagePicker.tsx
+          - Show already-uploaded images for a blog
+
+[ ] 15.04 Create src/components/admin/TagInput.tsx
+          - Combobox with existing tags
+          - Create-on-enter
+
+[ ] 15.05 Create src/components/admin/SeoPanel.tsx
+          - All SEO fields with char counters
+
+[ ] 15.06 Create src/components/admin/PublishPanel.tsx
+          - Status toggle, date picker, featured toggle
+          - Save + Publish buttons
+
+[ ] 15.07 Create src/hooks/useImageUpload.ts
+
+[ ] 15.08 Create src/components/admin/BlogEditor.tsx
+          - Full layout: main (editor) + sidebar (panels)
+          - react-hook-form with Zod schema
+          - Dirty state tracking via blogEditorSlice (Redux)
+          - Unsaved changes warning on navigate away
+
+[ ] 15.09 Implement src/app/(admin)/admin/blogs/new/page.tsx
+[ ] 15.10 Implement src/app/(admin)/admin/blogs/[id]/page.tsx (edit)
+[ ] 15.11 Implement src/app/(admin)/admin/blogs/[id]/preview/page.tsx
+
+[ ] 15.11a Implement src/app/(admin)/admin/images/page.tsx
+           - Image Library Page: lists, uploads, and deletes images
+           - Includes copy-to-clipboard buttons for jsDelivr CDN URLs
+
+[ ] 15.12 Test create blog: fill all fields, upload image, publish
+[ ] 15.13 Test edit blog: modify title, re-upload image, save draft
+[ ] 15.14 Test slug auto-generation
+[ ] 15.15 Test tag create-on-enter flow
+[ ] 15.16 Test SEO field char counters hit max limits correctly
+
+--------------------------------------------------
+PHASE 16: ADMIN CATEGORY + TAG MANAGEMENT
+--------------------------------------------------
+
+[ ] 16.01 Create src/components/admin/CategoryManager.tsx
+          - List with sort_order, is_active toggle
+          - Inline create/edit form
+          - Delete with confirm
+
+[ ] 16.02 Implement src/app/(admin)/admin/categories/page.tsx
+
+[ ] 16.03 Create src/components/admin/TagManager.tsx
+          - List with blog count
+          - Inline create
+          - Delete with confirm
+
+[ ] 16.04 Implement src/app/(admin)/admin/tags/page.tsx
+
+--------------------------------------------------
+PHASE 17: ADMIN AD MANAGEMENT
+--------------------------------------------------
+
+[ ] 17.01 Create src/components/admin/AdManager.tsx
+          - Table: Name, Placement, Device, Status, Actions
+          - Create/edit modal with ad_script textarea
+          - Placement + device dropdowns
+          - Enable/disable toggle
+
+[ ] 17.02 Implement src/app/(admin)/admin/ads/page.tsx
+[ ] 17.03 Test ad create + verify it appears in public /ads endpoint
+[ ] 17.04 Test AdUnit component renders ad script on public page
+
+--------------------------------------------------
+PHASE 17b: ADMIN DIAGNOSTIC ERROR LOGS
+--------------------------------------------------
+
+[ ] 17b.01 Create src/lib/api/admin/error-logs.api.ts
+           - getAdminErrorLogs(params)
+           - clearAllErrorLogs()
+           - bulkDeleteErrorLogs(ids)
+[ ] 17b.02 Implement src/app/(admin)/admin/error-logs/page.tsx
+           - Paginated tabular display of error logs (correlation ID, errorCode, errorType, method, status, createdAt)
+           - Drawer/Modal for viewing full JSON stackTrace and correlation metadata details
+           - Selectable rows with bulk-delete support
+           - "Clear All Logs" button with confirmation alert
+[ ] 17b.03 Test end-to-end exception tracking and admin deletions
+
+--------------------------------------------------
+PHASE 18: ISR REVALIDATION WEBHOOK
+--------------------------------------------------
+
+[ ] 18.01 Implement src/app/api/revalidate/route.ts (Section 18)
+[ ] 18.02 Test webhook: POST with secret header + body
+[ ] 18.03 Verify revalidatePath clears ISR cache for correct routes
+[ ] 18.04 Coordinate with backend team to call webhook after publish
+
+--------------------------------------------------
+PHASE 19: SEO AUDIT AND FINAL CHECKS
+--------------------------------------------------
+
+[ ] 19.01 Run Lighthouse on home page → target score > 90
+[ ] 19.02 Run Lighthouse on blog detail page → target score > 90
+[ ] 19.03 Test all generateMetadata outputs with browser devtools
+[ ] 19.04 Validate structured data with Google Rich Results Test
+[ ] 19.05 Validate sitemap.xml structure (valid XML, correct URLs)
+[ ] 19.06 Check robots.txt disallows /admin correctly
+[ ] 19.07 Verify canonical URLs set correctly on all blog pages
+[ ] 19.08 Test OG tags with Facebook Sharing Debugger
+[ ] 19.09 Test Twitter card with Twitter Card Validator
+[ ] 19.10 Verify no console errors on any public page
+
+--------------------------------------------------
+PHASE 20: PRODUCTION DEPLOYMENT
+--------------------------------------------------
+
+[ ] 20.01 Set all env vars in Vercel/Cloudflare Pages dashboard
+[ ] 20.02 Configure NEXT_PUBLIC_API_URL to production backend URL
+[ ] 20.03 Add NEXT_PUBLIC_SITE_URL to production site URL
+[ ] 20.04 Run production build locally: npm run build
+          - Fix any TypeScript or build errors
+[ ] 20.05 Deploy to Vercel / Cloudflare Pages
+[ ] 20.06 Test production home page loads (ISR working)
+[ ] 20.07 Test production blog detail loads with correct SEO tags
+[ ] 20.08 Test admin login on production
+[ ] 20.09 Test image upload on production (confirm CDN URLs work)
+[ ] 20.10 Test analytics tracking fires on production blog view
+[ ] 20.11 Monitor Vercel function logs for any SSR errors
+[ ] 20.12 Submit sitemap to Google Search Console
+
+
+==================================================
+END OF FRONTEND TECHNICAL DOCUMENTATION
+==================================================

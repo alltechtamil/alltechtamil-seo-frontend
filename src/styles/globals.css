@@ -1,0 +1,337 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@import "./typography.css";
+
+:root {
+  /* Editorial Precision Colors - Light Mode (Enterprise Corporate Theme) */
+  --background: #f7f9fb;
+  --on-background: #191c1e;
+  
+  --surface: #f7f9fb;
+  --surface-dim: #d8dadc;
+  --surface-bright: #f7f9fb;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f4f6;
+  --surface-container: #eceef0;
+  --surface-container-high: #e6e8ea;
+  --surface-container-highest: #e0e3e5;
+  --on-surface: #191c1e;
+  --on-surface-variant: #434655;
+  
+  --inverse-surface: #2d3133;
+  --inverse-on-surface: #eff1f3;
+  
+  --outline: #737686;
+  --outline-variant: #c3c6d7;
+  
+  --surface-tint: #0053db;
+  
+  /* Primary Brand: Enterprise Blue */
+  --primary: #004ac6;
+  --on-primary: #ffffff;
+  --primary-container: #2563eb;
+  --on-primary-container: #eeefff;
+  --inverse-primary: #b4c5ff;
+  
+  /* Secondary Brand: Deep Purple */
+  --secondary: #6b38d4;
+  --on-secondary: #ffffff;
+  --secondary-container: #8455ef;
+  --on-secondary-container: #fffbff;
+  
+  /* Tertiary Brand: Amber Orange for high-energy accents & SEO status alerts */
+  --tertiary: #943700;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #bc4800;
+  --on-tertiary-container: #ffede6;
+  
+  /* Semantic: Error States */
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  
+  /* Fixed Ranges for specific static UI components */
+  --primary-fixed: #dbe1ff;
+  --primary-fixed-dim: #b4c5ff;
+  --on-primary-fixed: #00174b;
+  --on-primary-fixed-variant: #003ea8;
+  --secondary-fixed: #e9ddff;
+  --secondary-fixed-dim: #d0bcff;
+  --on-secondary-fixed: #23005c;
+  --on-secondary-fixed-variant: #5516be;
+  --tertiary-fixed: #ffdbcd;
+  --tertiary-fixed-dim: #ffb596;
+  --on-tertiary-fixed: #360f00;
+  --on-tertiary-fixed-variant: #7d2d00;
+  --surface-variant: #e0e3e5;
+
+  /* Typography Fallbacks */
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Merriweather", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* Dark Mode - Premium Distraction-Free Developer Grayscale Variant */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0b0e11; /* Deep slate gray/black enterprise baseline */
+    --on-background: #e2e8f0; /* Crisp slate white */
+    
+    --surface: #111418;
+    --surface-dim: #0d1013;
+    --surface-bright: #1a1d21;
+    --surface-container-lowest: #07090b;
+    --surface-container-low: #0e1115;
+    --surface-container: #14181c;
+    --surface-container-high: #1b2025;
+    --surface-container-highest: #232930;
+    --on-surface: #eff1f3;
+    --on-surface-variant: #c3c6d7;
+    
+    --inverse-surface: #eff1f3;
+    --inverse-on-surface: #191c1e;
+    
+    --outline: #8c90a6;
+    --outline-variant: #434655;
+    
+    --surface-tint: #b4c5ff;
+    
+    /* Primary Brand: Brighter Enterprise Blue for high readability in dark context */
+    --primary: #5890ff;
+    --on-primary: #002573;
+    --primary-container: #00359c;
+    --on-primary-container: #dbe1ff;
+    --inverse-primary: #004ac6;
+    
+    /* Secondary Brand: Softer, luminous purple */
+    --secondary: #a78bfa;
+    --on-secondary: #37008a;
+    --secondary-container: #5516be;
+    --on-secondary-container: #e9ddff;
+    
+    /* Tertiary Brand: Vibrant Amber Orange */
+    --tertiary: #ff9c66;
+    --on-tertiary: #501b00;
+    --tertiary-container: #7d2d00;
+    --on-tertiary-container: #ffdbcd;
+    
+    /* Semantic: Error */
+    --error: #ffb4ab;
+    --on-error: #690005;
+    --error-container: #93000a;
+    --on-error-container: #ffdad6;
+    
+    /* Fixed scales (kept optimized for dark reading comfort) */
+    --primary-fixed: #003ea8;
+    --primary-fixed-dim: #002d7d;
+    --on-primary-fixed: #eff1f3;
+    --on-primary-fixed-variant: #b4c5ff;
+    --secondary-fixed: #5516be;
+    --secondary-fixed-dim: #3e009c;
+    --on-secondary-fixed: #eff1f3;
+    --on-secondary-fixed-variant: #d0bcff;
+    --tertiary-fixed: #7d2d00;
+    --tertiary-fixed-dim: #5a1e00;
+    --on-tertiary-fixed: #eff1f3;
+    --on-tertiary-fixed-variant: #ffb596;
+    --surface-variant: #232930;
+  }
+}
+
+/* Explicit class-based dark mode toggle override support */
+.dark {
+  --background: #0b0e11;
+  --on-background: #e2e8f0;
+  
+  --surface: #111418;
+  --surface-dim: #0d1013;
+  --surface-bright: #1a1d21;
+  --surface-container-lowest: #07090b;
+  --surface-container-low: #0e1115;
+  --surface-container: #14181c;
+  --surface-container-high: #1b2025;
+  --surface-container-highest: #232930;
+  --on-surface: #eff1f3;
+  --on-surface-variant: #c3c6d7;
+  
+  --inverse-surface: #eff1f3;
+  --inverse-on-surface: #191c1e;
+  
+  --outline: #8c90a6;
+  --outline-variant: #434655;
+  
+  --surface-tint: #b4c5ff;
+  
+  --primary: #5890ff;
+  --on-primary: #002573;
+  --primary-container: #00359c;
+  --on-primary-container: #dbe1ff;
+  --inverse-primary: #004ac6;
+  
+  --secondary: #a78bfa;
+  --on-secondary: #37008a;
+  --secondary-container: #5516be;
+  --on-secondary-container: #e9ddff;
+  
+  --tertiary: #ff9c66;
+  --on-tertiary: #501b00;
+  --tertiary-container: #7d2d00;
+  --on-tertiary-container: #ffdbcd;
+  
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  
+  --primary-fixed: #003ea8;
+  --primary-fixed-dim: #002d7d;
+  --on-primary-fixed: #eff1f3;
+  --on-primary-fixed-variant: #b4c5ff;
+  --secondary-fixed: #5516be;
+  --secondary-fixed-dim: #3e009c;
+  --on-secondary-fixed: #eff1f3;
+  --on-secondary-fixed-variant: #d0bcff;
+  --tertiary-fixed: #7d2d00;
+  --tertiary-fixed-dim: #5a1e00;
+  --on-tertiary-fixed: #eff1f3;
+  --on-tertiary-fixed-variant: #ffb596;
+  --surface-variant: #232930;
+}
+
+@theme {
+  /* Inject Design System Colors into Tailwind CSS v4 Engine */
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-surface-tint: var(--surface-tint);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-inverse-primary: var(--inverse-primary);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-on-primary-fixed: var(--on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
+  --color-tertiary-fixed: var(--tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
+  --color-surface-variant: var(--surface-variant);
+
+  /* Fonts */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+
+  /* Border Radii Custom Mappings */
+  --radius-sm: 0.25rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Custom Spacing Constants */
+  --spacing-base: 4px;
+  --spacing-container-max: 1280px;
+  --spacing-reading: 720px;
+  --spacing-gutter: 24px;
+  --spacing-margin-mobile: 16px;
+  --spacing-sidebar: 280px;
+}
+
+/* Custom Editorial Typography Utility Classes via Tailwind v4 utility syntax */
+@utility text-display-lg {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 60px;
+  letter-spacing: -0.02em;
+}
+
+@utility text-display-lg-mobile {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 40px;
+  letter-spacing: -0.01em;
+}
+
+@utility text-headline-md {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+}
+
+@utility text-body-reading {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+@utility text-body-ui {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+@utility text-label-caps {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@utility text-code-sm {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+/* Base Body Styles */
+body {
+  background-color: var(--background);
+  color: var(--on-background);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
