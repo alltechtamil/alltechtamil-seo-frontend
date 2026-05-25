@@ -1,8 +1,6 @@
 import { MetadataRoute } from 'next';
 import { envConfig } from '@/config/env.config';
 import { getPublicBlogs } from '@/lib/fetchers/blog.fetcher';
-import { getPublicCategories } from '@/lib/fetchers/category.fetcher';
-import { getPublicTags } from '@/lib/fetchers/tag.fetcher';
 
 // Ensure the sitemap is always freshly generated, fetching live DB entities
 export const dynamic = 'force-dynamic';
@@ -46,40 +44,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('[Sitemap] Failed to fetch blogs:', error);
     }
 
-    // 2. Dynamic Categories -> /search/category/:slug (Priority: 0.6)
-    let categoryRoutes: MetadataRoute.Sitemap = [];
-    try {
-        const categoriesRes = await getPublicCategories();
-        const categories = categoriesRes.data || [];
-        categoryRoutes = categories.map((cat) => ({
-            url: `${baseUrl}/search/category/${cat.slug}`,
-            lastModified: cat.updatedAt ? new Date(cat.updatedAt) : new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.6,
-        }));
-    } catch (error) {
-        console.error('[Sitemap] Failed to fetch categories:', error);
-    }
-
-    // 3. Dynamic Tags -> /search/tag/:slug (Priority: 0.5)
-    let tagRoutes: MetadataRoute.Sitemap = [];
-    try {
-        const tagsRes = await getPublicTags();
-        const tags = tagsRes.data || [];
-        tagRoutes = tags.map((tag) => ({
-            url: `${baseUrl}/search/tag/${tag.slug}`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.5,
-        }));
-    } catch (error) {
-        console.error('[Sitemap] Failed to fetch tags:', error);
-    }
-
     return [
         ...staticRoutes,
         ...blogRoutes,
-        ...categoryRoutes,
-        ...tagRoutes,
     ];
 }
