@@ -31,8 +31,6 @@ export async function generateMetadata({ searchParams }: BlogListingPageProps): 
     });
 }
 
-// ISR: revalidate every hour
-export const revalidate = 3600;
 
 const POSTS_PER_PAGE = 9;
 
@@ -60,6 +58,8 @@ export default async function BlogListingPage({ searchParams }: BlogListingPageP
     } catch (error) {
         console.error('[BlogListingPage] Failed to fetch blogs:', error);
     }
+
+    console.log("posts", posts)
 
     return (
         <div className="max-w-7xl mx-auto px-gutter py-12 md:py-16">

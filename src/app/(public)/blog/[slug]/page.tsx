@@ -40,13 +40,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         const response = await getPublicBlogBySlug(slug);
         const blog = response.data;
         if (!blog) return buildSeoMetadata({ title: 'Not Found', description: '', path: `/blog/${slug}` });
-        
+
         const featuredImageObj = getImageUrl(blog as any);
         const featuredImageUrl = typeof featuredImageObj === 'string' ? featuredImageObj : featuredImageObj.src;
-        
+
         const tagsList = ((blog as any).Tags || blog.tags || []) as any[];
-        const keywords = blog.focusKeyword 
-            ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)] 
+        const keywords = blog.focusKeyword
+            ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)]
             : tagsList.map((t: any) => t.name);
 
         return buildSeoMetadata({
@@ -64,24 +64,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    
+
     let blog;
     let relatedBlogs: BlogListItem[] = [];
-    
+
     try {
         const response = await getPublicBlogBySlug(slug);
         blog = response.data;
-        
+
         // Handle Prisma casing variations
         const category = (blog as any)?.Category || blog?.category;
-        
+
         if (category?.id) {
             relatedBlogs = await getRelatedBlogs(category.id, blog.id, 3);
         }
     } catch (error) {
         console.error("Failed to fetch blog:", error);
     }
-    
+
     if (!blog) {
         notFound();
     }
@@ -97,7 +97,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
     const featuredImageObj = getImageUrl(blog as any);
     const featuredImageUrl = typeof featuredImageObj === 'string' ? featuredImageObj : featuredImageObj.src;
-    
+
     const baseSiteUrl = envConfig.siteUrl.endsWith('/') ? envConfig.siteUrl : `${envConfig.siteUrl}/`;
 
     // Breadcrumb Data
@@ -105,17 +105,17 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         { label: 'Home', href: ROUTES.HOME },
     ];
     if (category) {
-        breadcrumbItems.push({ 
-            label: category.name, 
-            href: `/search/category/${category.slug}` 
+        breadcrumbItems.push({
+            label: category.name,
+            href: `/search/category/${category.slug}`
         });
     }
     breadcrumbItems.push({ label: blog.title });
 
     // 100x Better Structured Data for SEO: Premium BlogPosting Schema
     const tagsList = (tags || []) as any[];
-    const keywordsArray = blog.focusKeyword 
-        ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)] 
+    const keywordsArray = blog.focusKeyword
+        ? [blog.focusKeyword, ...tagsList.map((t: any) => t.name)]
         : tagsList.map((t: any) => t.name);
 
     const articleStructuredData = blog.structuredData || {
@@ -151,8 +151,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": breadcrumbItems.map((item, index) => {
-            const cleanHref = item.href 
-                ? (item.href.startsWith('/') ? item.href.slice(1) : item.href) 
+            const cleanHref = item.href
+                ? (item.href.startsWith('/') ? item.href.slice(1) : item.href)
                 : undefined;
             return {
                 "@type": "ListItem",
@@ -163,6 +163,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         })
     };
 
+    console.log("blog id", blog)
+
     return (
         <>
             <ReadingProgress />
@@ -171,17 +173,17 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             <JsonLd data={breadcrumbStructuredData as Record<string, unknown>} />
 
             {/* Top Ad */}
-            <AdUnit 
-                placement="BLOG_TOP" 
+            <AdUnit
+                placement="BLOG_TOP"
                 wrapperClassName="w-full flex justify-center py-8 bg-surface-container-low border-b border-outline-variant/30"
-                className="w-full max-w-4xl" 
+                className="w-full max-w-4xl"
             />
 
             <main className="w-full">
                 {/* Article Header */}
                 <section className="max-w-7xl mx-auto px-gutter mt-12">
                     <Breadcrumb items={breadcrumbItems} className="mb-8" />
-                    
+
                     <header className="mb-8 max-w-3xl">
                         {category && (
                             <Badge variant="primary" className="mb-4">
@@ -191,10 +193,10 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                         <h1 className="font-bold text-4xl md:text-5xl text-on-background mb-6 leading-tight tracking-tight">
                             {blog.title}
                         </h1>
-                        <BlogMeta 
-                            author={author} 
-                            publishedAt={publishedAt} 
-                            readTimeMinutes={readTimeMinutes} 
+                        <BlogMeta
+                            author={author}
+                            publishedAt={publishedAt}
+                            readTimeMinutes={readTimeMinutes}
                         />
                     </header>
                 </section>
@@ -203,13 +205,13 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 <div className="w-full mb-16">
                     <div className="w-full h-[400px] md:h-[600px] relative">
                         {images.length > 0 || featuredImageUrl !== '/images/no-image.png' ? (
-                                <CustomImage 
-                                src={featuredImageUrl} 
-                                alt={blog.title} 
+                            <CustomImage
+                                src={featuredImageUrl}
+                                alt={blog.title}
                                 fill
                                 priority
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
-                                className="object-cover" 
+                                className="object-cover"
                             />
                         ) : (
                             <div className="w-full h-full bg-surface-variant flex items-center justify-center">
@@ -224,9 +226,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     {/* Article Body */}
                     <article className="w-full md:max-w-3xl shrink-0">
                         <AdUnit placement="BLOG_INLINE_1" className="mb-8" />
-                        
+
                         <BlogContent html={blog.contentHtml} />
-                        
+
                         <AdUnit placement="BLOG_INLINE_2" className="mt-8" />
 
                         {/* Mobile Tags & Share (Hidden on Desktop) */}
@@ -237,7 +239,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                                     <ul className="flex flex-wrap gap-2">
                                         {tags.map((tag: any) => (
                                             <li key={tag.id}>
-                                                <Link 
+                                                <Link
                                                     href={`/search/tag/${tag.slug}` as any}
                                                     className="px-3 py-1 bg-surface-container-low border border-outline-variant/50 hover:border-primary/50 text-xs font-medium rounded-lg text-on-surface-variant hover:text-primary transition-colors block"
                                                 >
@@ -255,12 +257,12 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                         {author && (
                             <section aria-label="About the author" className="mt-20 p-8 bg-surface-container-low rounded-2xl border border-outline-variant/50 flex flex-col md:flex-row gap-8">
                                 <div className="relative w-24 h-24 shrink-0 rounded-2xl overflow-hidden">
-                                    <CustomImage 
-                                        src={author.avatarUrl || '/images/default-avatar.png'} 
-                                        alt={author.name} 
+                                    <CustomImage
+                                        src={author.avatarUrl || '/images/default-avatar.png'}
+                                        alt={author.name}
                                         fill
                                         sizes="(max-width: 768px) 96px, 96px"
-                                        className="object-cover rounded-full" 
+                                        className="object-cover rounded-full"
                                     />
                                 </div>
                                 <div>
@@ -271,9 +273,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                                 </div>
                             </section>
                         )}
-                        
-                        <AdUnit 
-                            placement="BLOG_BOTTOM" 
+
+                        <AdUnit
+                            placement="BLOG_BOTTOM"
                             wrapperClassName="w-full flex justify-center py-16"
                         />
                     </article>
@@ -282,9 +284,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     <aside className="hidden md:block w-96 shrink-0">
                         <div className="sticky top-24 flex flex-col gap-10">
                             <TableOfContents />
-                            
+
                             <AdUnit placement="BLOG_SIDEBAR" />
-                            
+
                             {/* Tags */}
                             {tags.length > 0 && (
                                 <nav aria-label="Article Tags">
@@ -292,7 +294,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                                     <ul className="flex flex-wrap gap-2">
                                         {tags.map((tag: any) => (
                                             <li key={tag.id}>
-                                                <Link 
+                                                <Link
                                                     href={`/search/tag/${tag.slug}` as any}
                                                     className="px-3 py-1 bg-surface-container-low border border-outline-variant/50 hover:border-primary/50 text-xs font-medium rounded-lg text-on-surface-variant hover:text-primary transition-colors block"
                                                 >

@@ -16,7 +16,7 @@ import { getImageUrl } from '@/lib/utils/getImageUrl';
 import { ROUTES } from '@/constants/routes';
 import type { BlogListItem } from '@/types/blog.types';
 
-export const revalidate = 60; // ISR revalidation every 60 seconds
+
 
 const POSTS_PER_PAGE = 9;
 

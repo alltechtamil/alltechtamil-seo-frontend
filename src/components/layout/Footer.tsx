@@ -16,7 +16,7 @@ export function Footer({ categories = [] }: FooterProps) {
             <div className="max-w-7xl mx-auto px-gutter grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-16">
                 
                 {/* Brand & Mission */}
-                <div className="md:col-span-12 lg:col-span-5 flex flex-col">
+                <div className="md:col-span-12 lg:col-span-8 flex flex-col">
                     <Link href={"/" as any} className="font-display-lg text-2xl font-extrabold text-primary mb-4 tracking-tight">
                         {envConfig.siteName}
                     </Link>
@@ -42,41 +42,23 @@ export function Footer({ categories = [] }: FooterProps) {
                 </div>
 
                 {/* Platform Links */}
-                <div className="md:col-span-4 lg:col-span-2 lg:col-start-7 flex flex-col">
-                    <h4 className="font-bold text-sm text-on-surface uppercase tracking-widest mb-6">Platform</h4>
-                    <ul className="flex flex-col gap-4">
-                        <li><Link href={"/blog" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Articles</Link></li>
-                        {categories.slice(0, 3).map((category) => (
-                            <li key={category.id}>
-                                <Link 
-                                    href={`/search/category/${category.slug}` as any} 
-                                    className="text-on-surface-variant hover:text-primary font-medium transition-colors"
-                                >
-                                    {category.name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Company Links */}
-                <div className="md:col-span-4 lg:col-span-2 flex flex-col">
-                    <h4 className="font-bold text-sm text-on-surface uppercase tracking-widest mb-6">Company</h4>
-                    <ul className="flex flex-col gap-4">
-                        <li><Link href={"/about" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">About Us</Link></li>
-                        <li><Link href={"/contact" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Contact</Link></li>
-                        <li><Link href={"/careers" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Careers</Link></li>
-                    </ul>
-                </div>
-
-                {/* Legal Links */}
-                <div className="md:col-span-4 lg:col-span-2 flex flex-col">
-                    <h4 className="font-bold text-sm text-on-surface uppercase tracking-widest mb-6">Legal</h4>
-                    <ul className="flex flex-col gap-4">
-                        <li><Link href={"/privacy" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Privacy Policy</Link></li>
-                        <li><Link href={"/terms" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Terms of Service</Link></li>
-                        <li><Link href={"/cookies" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Cookie Policy</Link></li>
-                    </ul>
+                <div className="md:col-span-12 lg:col-span-4 flex flex-col lg:items-end">
+                    <div className="flex flex-col">
+                        <h4 className="font-bold text-sm text-on-surface uppercase tracking-widest mb-6">Explore</h4>
+                        <ul className="flex flex-col gap-4">
+                            <li><Link href={"/blog" as any} className="text-on-surface-variant hover:text-primary font-medium transition-colors">Latest Articles</Link></li>
+                            {categories.slice(0, 4).map((category) => (
+                                <li key={category.id}>
+                                    <Link 
+                                        href={`/search/category/${category.slug}` as any} 
+                                        className="text-on-surface-variant hover:text-primary font-medium transition-colors"
+                                    >
+                                        {category.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             </div>
 
