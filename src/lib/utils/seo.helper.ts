@@ -32,7 +32,7 @@ export function buildSeoMetadata({
     locale = 'ta_IN',
     alternateLocales = ['en_US']
 }: SeoHelperProps): Metadata {
-    const siteUrl = envConfig.siteUrl || 'https://www.alltechtamil.in/';
+    const siteUrl = envConfig.siteUrl !== 'http://localhost:3000' && envConfig.siteUrl ? envConfig.siteUrl : 'https://alltechtamil.in/';
     // Clean absolute canonical url
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const canonicalUrl = `${siteUrl.replace(/\/$/, '')}${cleanPath === '/' ? '' : cleanPath}`;
@@ -43,7 +43,6 @@ export function buildSeoMetadata({
     return {
         title,
         description,
-        keywords,
         verification: verificationCode ? {
             google: verificationCode,
         } : undefined,
