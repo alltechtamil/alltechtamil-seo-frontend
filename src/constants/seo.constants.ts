@@ -1,7 +1,6 @@
 import { envConfig } from '@/config/env.config';
 
 export const SEO_CONSTANTS = {
-    googleSiteVerification: 'hp9LjcrCFLNfCy0DQt5IZU1g7DgiYrJ2erWpqbqCUbo',
     sameAs: [
         'https://www.instagram.com/all_tech_tamil',
         'https://twitter.com/all_tech_tamil'

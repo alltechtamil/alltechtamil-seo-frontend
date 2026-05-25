@@ -11,7 +11,6 @@ interface SeoHelperProps {
     image?: string;
     type?: 'website' | 'article';
     index?: boolean;
-    verificationCode?: string;
     locale?: string;
     alternateLocales?: string[];
 }
@@ -28,7 +27,6 @@ export function buildSeoMetadata({
     image,
     type = 'website',
     index = true,
-    verificationCode = SEO_CONSTANTS.googleSiteVerification,
     locale = 'ta_IN',
     alternateLocales = ['en_US']
 }: SeoHelperProps): Metadata {
@@ -43,9 +41,6 @@ export function buildSeoMetadata({
     return {
         title,
         description,
-        verification: verificationCode ? {
-            google: verificationCode,
-        } : undefined,
         alternates: {
             canonical: canonicalUrl,
             languages: {
