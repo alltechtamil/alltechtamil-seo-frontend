@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Node, mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
@@ -40,6 +41,91 @@ import {
 
 // Create syntax highlight instance using common languages
 const lowlight = createLowlight(common);
+
+// Raw HTML Bypass Extensions
+const CustomButton = Node.create({
+  name: 'customButton',
+  group: 'inline',
+  inline: true,
+  content: 'text*',
+  parseHTML() {
+    return [{ tag: 'button' }];
+  },
+  addAttributes() {
+    return {
+      id: { default: null },
+      class: { default: null },
+      style: { default: null },
+      onclick: { default: null },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['button', mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const CustomScript = Node.create({
+  name: 'customScript',
+  group: 'block',
+  content: 'text*',
+  parseHTML() {
+    return [{ tag: 'script' }];
+  },
+  addAttributes() {
+    return {
+      src: { default: null },
+      type: { default: null },
+      id: { default: null },
+      class: { default: null },
+      async: { default: null },
+      defer: { default: null },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['script', mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const CustomDiv = Node.create({
+  name: 'customDiv',
+  group: 'block',
+  content: 'block+',
+  parseHTML() {
+    return [{ tag: 'div' }];
+  },
+  addAttributes() {
+    return {
+      id: { default: null },
+      class: { default: null },
+      style: { default: null },
+      onclick: { default: null },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const CustomTextarea = Node.create({
+  name: 'customTextarea',
+  group: 'block',
+  content: 'text*',
+  parseHTML() {
+    return [{ tag: 'textarea' }];
+  },
+  addAttributes() {
+    return {
+      id: { default: null },
+      class: { default: null },
+      style: { default: null },
+      readonly: { default: null },
+      disabled: { default: null },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['textarea', mergeAttributes(HTMLAttributes), 0];
+  },
+});
 
 interface RichTextEditorProps {
   content: string;
@@ -85,6 +171,10 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           class: 'rounded-2xl p-4 bg-surface-container-low font-mono text-xs text-on-surface overflow-x-auto my-6 border border-outline-variant/40 shadow-inner',
         },
       }),
+      CustomButton,
+      CustomScript,
+      CustomDiv,
+      CustomTextarea,
     ],
     content: content || '',
     onUpdate: ({ editor }) => {

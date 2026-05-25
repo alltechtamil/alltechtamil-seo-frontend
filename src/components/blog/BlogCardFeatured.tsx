@@ -35,7 +35,7 @@ export function BlogCardFeatured({ post }: BlogCardFeaturedProps) {
 
     return (
         <Link href={href as Route} className="block mb-12 group" title={`Read ${title}`}>
-            <article className="relative h-[480px] xs:h-[520px] sm:h-[450px] md:h-[500px] lg:h-[460px] w-full rounded-3xl overflow-hidden cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+            <article className="relative h-[480px] xs:h-[520px] sm:h-[450px] md:h-[500px] lg:h-[560px] w-full rounded-3xl overflow-hidden cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
                 <CustomImage fill priority alt={title}
                     sizes="(max-width: 1200px) 100vw, 1200px"
                     className="object-cover transition-transform duration-1000 group-hover:scale-105"

@@ -37,14 +37,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const pathname = usePathname();
 
-  // Initialize session on mount
+  // Initialize session on mount and route change transitions
   useEffect(() => {
     const initializeSession = async () => {
       // If we already have a validated user session, do not re-fetch on route changes
-      if (isAuthenticated && user) return;
+      if (isAuthenticated && user) {
+        dispatch(setLoading(false));
+        return;
+      }
 
-      // Only check session for admin panel or login routes
+      // Only check session for admin panel or login routes.
+      // If on public pages, make sure to disable loading skeleton.
       if (!pathname?.startsWith('/admin') && !pathname?.startsWith('/login')) {
+        dispatch(setLoading(false));
         return;
       }
 
@@ -77,9 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     initializeSession();
-    // Intentionally omitting pathname to prevent aggressive layout unmounting loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, [dispatch, pathname, isAuthenticated, user]);
 
   const login = async (credentials: LoginCredentials) => {
     dispatch(setLoading(true));

@@ -39,7 +39,7 @@ export function BlogCard({ post }: BlogCardProps) {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-tertiary scale-x-0 group-hover/card:scale-x-100 transition-transform duration-500 origin-left z-20" />
 
                 {/* Image Container with CustomImage */}
-                <div className="relative w-full h-[220px] overflow-hidden bg-surface-container-low">
+                <div className="relative w-full h-[280px] overflow-hidden bg-surface-container-low">
                     <CustomImage 
                         fill
                         src={imageSrc} 

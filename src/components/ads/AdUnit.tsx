@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useAds } from '@/hooks/useAds';
+import { cn } from '@/lib/utils/cn';
 import type { AdPlacement } from '@/types/ad.types';
 
 export interface AdUnitProps {
@@ -15,20 +16,26 @@ export function AdUnit({ placement, className, wrapperClassName }: AdUnitProps) 
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (ads.length > 0 && containerRef.current) {
-      const activeAd = ads.find(ad => ad.isActive);
-      
-      if (activeAd && activeAd.adScript) {
-        try {
-          // Clear previous content
+    if (containerRef.current) {
+      if (ads.length > 0) {
+        const activeAd = ads.find(ad => ad.isActive);
+        
+        if (activeAd && activeAd.adScript) {
+          try {
+            // Clear previous content
+            containerRef.current.innerHTML = '';
+            
+            // Inject script safely. Using createContextualFragment allows <script> tags to execute.
+            const fragment = document.createRange().createContextualFragment(activeAd.adScript);
+            containerRef.current.appendChild(fragment);
+          } catch (e) {
+            console.error(`Failed to inject ad script for placement ${placement}:`, e);
+          }
+        } else {
           containerRef.current.innerHTML = '';
-          
-          // Inject script safely. Using createContextualFragment allows <script> tags to execute.
-          const fragment = document.createRange().createContextualFragment(activeAd.adScript);
-          containerRef.current.appendChild(fragment);
-        } catch (e) {
-          console.error(`Failed to inject ad script for placement ${placement}:`, e);
         }
+      } else {
+        containerRef.current.innerHTML = '';
       }
     }
   }, [ads, placement]);
@@ -41,7 +48,23 @@ export function AdUnit({ placement, className, wrapperClassName }: AdUnitProps) 
     return null;
   }
 
-  const adContent = <div ref={containerRef} className={className} />;
+  const adContent = (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ad-unit-container iframe,
+        .ad-unit-container object,
+        .ad-unit-container embed,
+        .ad-unit-container img {
+          max-width: 100% !important;
+          height: auto !important;
+        }
+      ` }} />
+      <div 
+        ref={containerRef} 
+        className={cn("ad-unit-container w-full flex justify-center items-center overflow-hidden", className)} 
+      />
+    </>
+  );
 
   if (wrapperClassName) {
     return (

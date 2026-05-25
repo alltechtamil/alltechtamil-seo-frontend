@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
     switch (type) {
       case 'blog':
         if (!slug) throw new Error('Slug is required for blog revalidation');
-        revalidatePath(`/${slug}`);
+        revalidatePath(`/blog/${slug}`);
         revalidatePath('/'); // Home page might show this new blog
-        pathsRevalidated = [`/${slug}`, '/'];
+        pathsRevalidated = [`/blog/${slug}`, '/'];
         break;
 
       case 'category':

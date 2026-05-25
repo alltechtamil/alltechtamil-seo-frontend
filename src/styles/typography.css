@@ -147,3 +147,36 @@
   border-top: 1px solid var(--color-outline-variant);
   margin: 2.5rem 0;
 }
+
+/* Premium interactive elements inside blog content */
+.blog-typography button,
+.prose button {
+  color: #ffffff !important; /* Force button text color to be high-contrast white by default! */
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease !important;
+}
+
+.blog-typography button:hover,
+.prose button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.blog-typography button:active,
+.prose button:active {
+  transform: translateY(0);
+}
+
+/* Force paragraph tags nested inside buttons to inherit color and reset margins */
+.blog-typography button p,
+.prose button p {
+  color: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline !important;
+  line-height: inherit !important;
+}

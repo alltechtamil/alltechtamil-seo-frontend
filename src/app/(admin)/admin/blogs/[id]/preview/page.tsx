@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchAdminBlogById, clearCurrentBlog } from '@/store/slices/blogsSlice';
 import { Loader2, ArrowLeft, Calendar, User, Hash, AlertCircle } from 'lucide-react';
+import { BlogContent } from '@/components/blog/BlogContent';
 
 export default function BlogPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
@@ -74,13 +75,17 @@ export default function BlogPreviewPage({ params }: { params: Promise<{ id: stri
         
         {/* Cover Image Placeholder */}
         {currentBlog.ogImageUrl && (
-          <div className="w-full aspect-[2/1] rounded-2xl overflow-hidden mb-10 border border-outline-variant/20 shadow-inner bg-surface-container-low relative">
-            {/* Using standard img to avoid Next/Image domain config issues in the sandbox */}
+          <div className="w-full max-w-3xl mx-auto aspect-[2/1] md:aspect-video max-h-[220px] md:max-h-[400px] rounded-xl md:rounded-3xl overflow-hidden mb-10 border border-outline-variant/20 shadow-lg bg-surface-container-low relative flex items-center justify-center">
+            {/* Blurred background effect to elegantly fill empty spaces for 1:1 or vertical images */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center blur-2xl opacity-25 scale-110"
+              style={{ backgroundImage: `url(${currentBlog.ogImageUrl})` }}
+            />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={currentBlog.ogImageUrl} 
               alt={currentBlog.title}
-              className="w-full h-full object-cover"
+              className="relative max-w-full max-h-full w-auto h-auto object-contain rounded-lg md:rounded-2xl z-10 shadow-md"
             />
           </div>
         )}
@@ -128,19 +133,10 @@ export default function BlogPreviewPage({ params }: { params: Promise<{ id: stri
 
         {/* =======================================================
             CORE RICH TEXT RENDER 
-            Tailwind Typography prose handles all raw HTML styling
+            Unified BlogContent handles HTML parsing, script execution, 
+            and premium typography styles
         ======================================================= */}
-        <div 
-          className="prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none 
-          prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-on-surface
-          prose-p:text-on-surface prose-strong:text-on-surface prose-li:text-on-surface
-          prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-          prose-img:rounded-2xl prose-img:shadow-md prose-img:border prose-img:border-outline-variant/30
-          prose-pre:bg-surface-container-low prose-pre:border prose-pre:border-outline-variant/40 prose-pre:text-on-surface
-          prose-code:text-primary prose-code:before:content-none prose-code:after:content-none
-          prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-xl prose-blockquote:py-1 prose-blockquote:text-on-surface-variant"
-          dangerouslySetInnerHTML={{ __html: currentBlog.contentHtml }}
-        />
+        <BlogContent html={currentBlog.contentHtml} />
 
         {/* Public Tags Array */}
         {currentBlog.tags && currentBlog.tags.length > 0 && (

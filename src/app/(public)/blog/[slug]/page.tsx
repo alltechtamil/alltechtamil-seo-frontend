@@ -203,16 +203,23 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
                 {/* Featured Image */}
                 <div className="w-full mb-16">
-                    <div className="w-full h-[400px] md:h-[600px] relative">
+                    <div className="w-full aspect-[2/1] md:aspect-[16/9] max-h-[300px] md:max-h-[550px] rounded-xl md:rounded-3xl overflow-hidden border border-outline-variant/20 shadow-lg bg-surface-container-low relative flex items-center justify-center">
                         {images.length > 0 || featuredImageUrl !== '/images/no-image.png' ? (
-                            <CustomImage
-                                src={featuredImageUrl}
-                                alt={blog.title}
-                                fill
-                                priority
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
-                                className="object-cover"
-                            />
+                            <>
+                                {/* Blurred background effect to elegantly fill empty spaces for 1:1 or vertical images */}
+                                <div 
+                                    className="absolute inset-0 bg-cover bg-center blur-2xl opacity-25 scale-110 z-0"
+                                    style={{ backgroundImage: `url(${featuredImageUrl})` }}
+                                />
+                                <CustomImage
+                                    src={featuredImageUrl}
+                                    alt={blog.title}
+                                    fill
+                                    priority
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
+                                    className="object-contain z-10"
+                                />
+                            </>
                         ) : (
                             <div className="w-full h-full bg-surface-variant flex items-center justify-center">
                                 <span className="text-on-surface-variant/50">No Image Available</span>
