@@ -44,7 +44,25 @@ export function AdUnit({ placement, className, wrapperClassName }: AdUnitProps) 
   // render the beautiful placeholder (especially useful for dev environments)
   const hasActiveAd = ads.some(ad => ad.isActive);
 
-  if (loading || error || !hasActiveAd) {
+  // During active loading state (before client fetch resolves),
+  // we render a pulse skeleton using the exact layout dimensions (className)
+  // to reserve page space and eliminate Cumulative Layout Shift (CLS).
+  if (loading) {
+    return (
+      <div 
+        className={cn(
+          "w-full flex justify-center items-center bg-surface-container-low/15 animate-pulse border border-outline-variant/5 rounded-lg text-[10px] tracking-wider text-outline/25 font-mono uppercase select-none",
+          className
+        )}
+      >
+        Ad Space
+      </div>
+    );
+  }
+
+  // If loading is finished and there's no active ad or an error occurred,
+  // collapse the space entirely to avoid leaving an empty gap on the page.
+  if (error || !hasActiveAd) {
     return null;
   }
 
